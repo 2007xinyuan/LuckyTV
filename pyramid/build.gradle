@@ -11,7 +11,12 @@ android {
         targetSdkVersion 28
 
         python {
-            buildPython("D:/Programs/Python/Python38/python.exe")
+            // CI (Linux) 用系统 Python，本地 Windows 用指定路径
+            if (System.getProperty('os.name').toLowerCase().contains('linux')) {
+                buildPython("/usr/bin/python3")
+            } else {
+                buildPython("D:/Programs/Python/Python38/python.exe")
+            }
             pip {
                 install "lxml"
                 install "ujson"
