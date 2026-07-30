@@ -13,7 +13,8 @@ android {
         python {
             // CI (Linux) 用系统 Python，本地 Windows 用指定路径
             if (System.getProperty('os.name').toLowerCase().contains('linux')) {
-                buildPython("/usr/bin/python3")
+                // CI 用 setup-python 安装的版本（在PATH上）
+                buildPython("python3")
             } else {
                 buildPython("D:/Programs/Python/Python38/python.exe")
             }
