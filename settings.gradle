@@ -1,0 +1,4 @@
+rootProject.name = "LuckyTV"
+include ':app'
+include ':quickjs'
+include ':pyramid'

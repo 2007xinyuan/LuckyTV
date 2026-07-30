@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="color_FFB800">#FF8C00</color>
+
+    <!-- Main Theme - 儿童乐园暖色系 -->
+    <color name="color_theme">#FF8C00</color>
+    <color name="color_theme_80">#CCFF8C00</color>
+    <color name="color_theme_70">#B3FF8C00</color>
+    <color name="color_theme_60">#99FF8C00</color>
+    <color name="color_theme_50">#80FF8C00</color>
+    <color name="color_theme_40">#66FF8C00</color>
+    <!-- Main Dialog Button BG -->
+    <color name="color_theme_dark_70">#B3FFB347</color>
+
+    <!-- EPG Colors -->
+    <color name="color_32364E">#87CEEB</color>
+    <color name="color_32364E_80">#CC87CEEB</color>
+    <color name="color_32364E_40">#6687CEEB</color>
+    <color name="color_3D3D3D">#FFE4B5</color>
+    <color name="color_3D3D3D_45">#73FFE4B5</color>
+    <color name="color_3D3D3D_50">#80FFE4B5</color>
+	
+    <!-- 筛选界面背景颜色 -->
+    <color name="color_3D3D3D_80">#CCFFE4B5</color>
+
+    <!-- Live Menu BG (left / right) -->
+    <color name="color_0E0E0E_90">#E6FFF8E7</color>
+
+    <!-- Main Dialog BG -->
+    <color name="color_6A6A6A_95">#F2FFE4B5</color>
+
+    <color name="color_FFFFFF">#FFFFFF</color>
+    <color name="color_FFFFFF_90">#E6FFFFFF</color>
+    <color name="color_FFFFFF_80">#CCFFFFFF</color>
+    <color name="color_FFFFFF_70">#B3FFFFFF</color>
+    <color name="color_FFFFFF_50">#80FFFFFF</color>
+    <color name="color_FFFFFF_40">#66FFFFFF</color>
+    <color name="color_FFFFFF_20">#32FFFFFF</color>
+    <color name="color_FFFFFF_15">#26FFFFFF</color>
+
+    <color name="transparent">#00000000</color>
+    <color name="color_FF000000">#FF333333</color>
+    <color name="color_000000_90">#E6333333</color>
+    <color name="color_000000_80">#CC333333</color>
+    <color name="color_000000_70">#B3333333</color>
+    <color name="color_000000_60">#99333333</color>
+    <color name="color_000000_40">#66333333</color>
+    <color name="color_000000_30">#48333333</color>
+    <color name="color_000000_20">#32333333</color>
+    <color name="color_000000_15">#26333333</color>
+
+    <color name="color_000000_80F">#80333333</color>
+    <color name="color_000000_8A">#8A333333</color>
+    <color name="color_000000_94">#94333333</color>
+    <color name="color_000000_9E">#9E333333</color>
+    <color name="color_000000_A8">#A8333333</color>
+    <color name="color_000000_B2">#B2333333</color>
+    <color name="color_000000_BC">#BC333333</color>
+    <color name="color_000000_C6">#C6333333</color>
+    <color name="color_000000_FF">#FF333333</color>
+
+    <!-- 新增：次要文字颜色 -->
+    <color name="color_secondary_text">#666666</color>
+    <color name="color_background_warm">#FFF8E7</color>
+    <color name="color_button_warm">#FFB347</color>
+
+    <!-- Unused Subtitle Text -->
+    <color name="color_FFB6C1">#FFB6C1</color>
+    <color name="color_6CFFFFFF">#6CFFFFFF</color>
+    <color name="color_CCFFFFFF">#CCFFFFFF</color>
+
+
+    <color name="subtitle_text_color_1">#333333</color>
+    <color name="subtitle_text_color_2">#444444</color>
+    <color name="subtitle_text_color_3">#555555</color>
+    <color name="subtitle_text_color_4">#666666</color>
+    <color name="subtitle_text_color_5">#777777</color>
+    <color name="subtitle_text_color_6">#888888</color>
+    <color name="subtitle_text_color_7">#999999</color>
+    <color name="subtitle_text_color_8">#AAAAAA</color>
+    <color name="subtitle_text_color_9">#BBBBBB</color>
+
+
+    <!-- 定义颜色数组 -->
+    <array name="subtitle_text_color">
+        <item>@color/subtitle_text_color_1</item>
+        <item>@color/subtitle_text_color_2</item>
+        <item>@color/subtitle_text_color_3</item>
+        <item>@color/subtitle_text_color_4</item>
+        <item>@color/subtitle_text_color_5</item>
+        <item>@color/subtitle_text_color_6</item>
+        <item>@color/subtitle_text_color_7</item>
+        <item>@color/subtitle_text_color_8</item>
+        <item>@color/subtitle_text_color_9</item>
+        <item>@color/color_FFB6C1</item>
+
+    </array>
+    <array name="subtitle_text_shadow_color">
+        <item>@color/color_000000_80F</item>
+        <item>@color/color_000000_8A</item>
+        <item>@color/color_000000_94</item>
+        <item>@color/color_000000_9E</item>
+        <item>@color/color_000000_A8</item>
+        <item>@color/color_000000_B2</item>
+        <item>@color/color_000000_BC</item>
+        <item>@color/color_000000_C6</item>
+        <item>@color/color_000000_FF</item>
+        <item>@color/color_000000_80F</item>
+
+
+    </array>
+
+</resources>
