@@ -2,20 +2,18 @@
 buildscript {
     ext.kotlin_version = "1.9.25"
     repositories {
-        // CI (Linux) 跳过阿里云镜像（502），只用官方源
-        if (!System.getProperty('os.name').toLowerCase().contains('linux')) {
-            maven { url "https://maven.aliyun.com/repository/public" }
-            maven { url "https://maven.aliyun.com/repository/central" }
-            maven { url "https://maven.aliyun.com/repository/google" }
-            maven { url "https://maven.aliyun.com/repository/releases" }
-            maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
-        }
-        google()
+        google()          // 优先官方源
         mavenCentral()
         gradlePluginPortal()
         maven { url "https://jitpack.io" }
         maven { url "https://storage.googleapis.com/r8-releases/raw" }
         maven { url "https://chaquo.com/maven" }
+        // 阿里云镜像（部分中国特供库只在此）
+        maven { url "https://maven.aliyun.com/repository/public" }
+        maven { url "https://maven.aliyun.com/repository/central" }
+        maven { url "https://maven.aliyun.com/repository/google" }
+        maven { url "https://maven.aliyun.com/repository/releases" }
+        maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.4.2'
@@ -30,18 +28,16 @@ buildscript {
 
 allprojects {
     repositories {
-        // CI (Linux) 跳过阿里云镜像（502），只用官方源
-        if (!System.getProperty('os.name').toLowerCase().contains('linux')) {
-            maven { url "https://maven.aliyun.com/repository/public" }
-            maven { url "https://maven.aliyun.com/repository/central" }
-            maven { url "https://maven.aliyun.com/repository/google" }
-            maven { url "https://maven.aliyun.com/repository/releases" }
-            maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
-        }
-        google()
+        google()          // 优先官方源
         mavenCentral()
         gradlePluginPortal()
         maven { url "https://jitpack.io" }
+        // 阿里云镜像（部分中国特供库只在此）
+        maven { url "https://maven.aliyun.com/repository/public" }
+        maven { url "https://maven.aliyun.com/repository/central" }
+        maven { url "https://maven.aliyun.com/repository/google" }
+        maven { url "https://maven.aliyun.com/repository/releases" }
+        maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
     }
 }
 
