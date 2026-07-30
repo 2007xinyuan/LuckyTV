@@ -83,7 +83,9 @@ public class BackupDialog extends BaseDialog {
                                 public void onDenied(List<String> permissions, boolean never) {
                                     if (never) {
                                         Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_permission_fail2), Toast.LENGTH_SHORT).show();
-                                        XXPermissions.startPermissionActivity((Activity) getContext(), permissions);
+                                        Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                        intent.setData(android.net.Uri.parse("package:" + getContext().getPackageName()));
+                                        getContext().startActivity(intent);
                                     } else {
                                         Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_permission_fail1), Toast.LENGTH_SHORT).show();
                                     }
