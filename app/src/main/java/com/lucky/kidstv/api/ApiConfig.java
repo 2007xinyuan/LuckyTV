@@ -139,11 +139,9 @@ public class ApiConfig {
 
     public void loadConfig(boolean useCache, LoadConfigCallback callback, Activity activity) {
         // Embedded Source : Update in Strings.xml if required
-        String apiUrl = Hawk.get(HawkConfig.API_URL, "");
-        if (apiUrl.isEmpty()) {
-            // 兜底：Hawk 无值/空值时回落默认接口（儿童配置），首次安装免配置
-            apiUrl = HomeActivity.getRes().getString(R.string.app_source);
-        }
+        // 空值兜底：Hawk 无值/空值时回落默认接口（儿童配置），首次安装免配置
+        String hawkApi = Hawk.get(HawkConfig.API_URL, "");
+        String apiUrl = (hawkApi == null || hawkApi.isEmpty()) ? HomeActivity.getRes().getString(R.string.app_source) : hawkApi;
         if (apiUrl.isEmpty()) {
             callback.error("源地址为空");
             return;
