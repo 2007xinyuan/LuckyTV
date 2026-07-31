@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 apply plugin: 'com.yanzhenjie.andserver'
 
 def static buildTime() {
@@ -140,7 +139,7 @@ dependencies {
     implementation project(path: ':quickjs')
     pythonImplementation project(":pyramid")
     
-kapt 'androidx.room:room-compiler:2.6.1'
+annotationProcessor 'androidx.room:room-compiler:2.6.1'
     implementation 'com.github.alidili:FlowLayout:v1.5'
     implementation 'androidx.room:room-runtime:2.6.1'
     implementation 'androidx.multidex:multidex:2.0.1'
