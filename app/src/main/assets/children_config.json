@@ -4,17 +4,22 @@
  "wallpaper": "http://127.0.0.1:9978/proxy?do=wallpaper",
  "sites": [
   {
-   "key": "动画片大全",
-   "name": "🎬动画片大全",
-   "type": 3,
-   "api": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/js/动画片大全.js",
+   "key": "量子动画",
+   "name": "量子动画",
+   "type": 1,
+   "api": "https://cj.lziapi.com/api.php/provide/vod/?ac=list",
    "searchable": 1,
-   "quickSearch": 0,
-   "filterable": 0
+   "quickSearch": 1,
+   "filterable": 1,
+   "categories": [
+    "动画片",
+    "国产动漫",
+    "欧美动漫"
+   ]
   },
   {
    "key": "哔哩少儿",
-   "name": "🅰少儿┃哔哩",
+   "name": "少儿|哔哩",
    "type": 3,
    "api": "csp_Bili",
    "searchable": 0,
@@ -31,7 +36,7 @@
   },
   {
    "key": "Cat_聚合儿歌",
-   "name": "👶聚合丨儿童",
+   "name": "聚合|儿童",
    "type": 3,
    "api": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/js/erge_juhe.js",
    "searchable": 1,
@@ -40,7 +45,7 @@
   },
   {
    "key": "口才",
-   "name": "🧒口才┃儿童",
+   "name": "口才|儿童",
    "type": 3,
    "api": "csp_Bili",
    "searchable": 0,
@@ -57,7 +62,7 @@
   },
   {
    "key": "拼音",
-   "name": "🧒拼音┃儿童",
+   "name": "拼音|儿童",
    "type": 3,
    "api": "csp_Bili",
    "searchable": 0,
@@ -74,7 +79,7 @@
   },
   {
    "key": "识字",
-   "name": "🧒识字┃儿童",
+   "name": "识字|儿童",
    "type": 3,
    "api": "csp_Bili",
    "searchable": 0,
@@ -91,7 +96,7 @@
   },
   {
    "key": "思维",
-   "name": "🧒思维┃儿童",
+   "name": "思维|儿童",
    "type": 3,
    "api": "csp_Bili",
    "searchable": 0,
@@ -108,7 +113,7 @@
   },
   {
    "key": "英语",
-   "name": "🧒英语┃儿童",
+   "name": "英语|儿童",
    "type": 3,
    "api": "csp_Bili",
    "searchable": 0,
@@ -125,7 +130,7 @@
   },
   {
    "key": "科学",
-   "name": "🧒科学┃哔哩",
+   "name": "科学|哔哩",
    "type": 3,
    "api": "csp_Bili",
    "searchable": 0,
@@ -142,7 +147,7 @@
   },
   {
    "key": "国学",
-   "name": "🧒国学┃哔哩",
+   "name": "国学|哔哩",
    "type": 3,
    "api": "csp_Bili",
    "searchable": 0,
@@ -159,7 +164,7 @@
   },
   {
    "key": "地理",
-   "name": "🧒地理┃哔哩",
+   "name": "地理|哔哩",
    "type": 3,
    "api": "csp_Bili",
    "searchable": 0,
@@ -176,7 +181,7 @@
   },
   {
    "key": "编程",
-   "name": "🧒编程┃哔哩",
+   "name": "编程|哔哩",
    "type": 3,
    "api": "csp_Bili",
    "searchable": 0,

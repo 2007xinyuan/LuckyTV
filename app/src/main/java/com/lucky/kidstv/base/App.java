@@ -9,6 +9,7 @@ import androidx.multidex.MultiDexApplication;
 
 import com.github.catvod.crawler.JarLoader;
 import com.github.catvod.crawler.JsLoader;
+import com.lucky.kidstv.BuildConfig;
 import com.lucky.kidstv.R;
 import com.lucky.kidstv.callback.EmptyCallback;
 import com.lucky.kidstv.callback.LoadingCallback;
@@ -19,6 +20,7 @@ import com.lucky.kidstv.util.FileUtils;
 import com.lucky.kidstv.util.HawkConfig;
 import com.lucky.kidstv.util.LocaleHelper;
 import com.lucky.kidstv.util.LOG;
+import com.lucky.kidstv.util.LogUploader;
 import com.lucky.kidstv.util.OkGoHelper;
 import com.lucky.kidstv.util.PlayerHelper;
 import com.lucky.kidstv.util.SubtitleHelper;
@@ -61,6 +63,8 @@ public class App extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        // 七牛云日志/崩溃上报（设备区分，Hermes 可云端拉取 debug）
+        LogUploader.init(this, BuildConfig.QINIU_AK, BuildConfig.QINIU_SK, BuildConfig.QINIU_BUCKET);
         SubtitleHelper.initSubtitleColor(this);
         initParams();
         // takagen99 : Initialize Locale

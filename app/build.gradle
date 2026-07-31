@@ -16,6 +16,10 @@ android {
         versionCode 1
         versionName "1.0.".concat(buildTime())
         multiDexEnabled true
+        // 七牛云日志上报配置（gradle.properties 或 CI secrets 注入；为空则日志功能禁用）
+        buildConfigField "String", "QINIU_AK", "\"${project.findProperty('QINIU_AK') ?: ''}\""
+        buildConfigField "String", "QINIU_SK", "\"${project.findProperty('QINIU_SK') ?: ''}\""
+        buildConfigField "String", "QINIU_BUCKET", "\"${project.findProperty('QINIU_BUCKET') ?: ''}\""
         //设置room的Schema的位置
         javaCompileOptions {
             annotationProcessorOptions {
@@ -105,6 +109,7 @@ android {
 
     buildFeatures {
         dataBinding = true
+        buildConfig = true
     }
 
     lint {
