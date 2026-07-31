@@ -55,6 +55,12 @@ android {
                 abiFilters 'x86'
             }
         }
+        x86_64 {
+            dimension = "abi"
+            ndk {
+                abiFilters 'x86_64'
+            }
+        }
 
         generic  {
             //通用版本
