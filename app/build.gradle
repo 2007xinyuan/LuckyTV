@@ -167,7 +167,9 @@ dependencies {
         exclude group: 'com.android.support'
     }
     implementation 'com.blankj:utilcodex:1.31.0'
-    implementation 'com.github.getActivity:XXPermissions:18.5'
+    implementation('com.github.getActivity:XXPermissions:18.5') {
+        exclude group: 'com.android.support'
+    }
     implementation 'org.jsoup:jsoup:1.16.1'
     implementation 'com.github.hedzr:android-file-chooser:v1.2.0-final'
     implementation 'commons-io:commons-io:2.13.0'
