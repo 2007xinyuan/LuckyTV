@@ -17,7 +17,7 @@ import com.lucky.kidstv.server.ControlManager;
 import com.lucky.kidstv.ui.activity.HomeActivity;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.hjq.permissions.Permission;
+import android.Manifest;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -259,7 +259,7 @@ public class DefaultConfig {
 
     public static String[] StoragePermissionGroup() {
         return new String[] {
-                Permission.MANAGE_EXTERNAL_STORAGE                
+                Manifest.permission.MANAGE_EXTERNAL_STORAGE                
         };
     }
 
