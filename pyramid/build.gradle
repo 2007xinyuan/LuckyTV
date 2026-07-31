@@ -47,6 +47,13 @@ android {
                 abiFilters 'arm64-v8a'
             }
         }
+
+        x86 {
+            dimension = "abi"
+            ndk {
+                abiFilters 'x86'
+            }
+        }
     }
 
     buildTypes {
