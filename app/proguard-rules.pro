@@ -321,3 +321,17 @@
 -keepclassmembers,allowobfuscation class * { @org.simpleframework.xml.Element <fields>; }
 -keepclassmembers,allowobfuscation class * { @org.simpleframework.xml.Attribute <fields>; }
 -keepclassmembers,allowobfuscation class * { @org.simpleframework.xml.ElementList <fields>; }
+
+#############################################
+# Room 数据库（kapt 生成 *_Impl，防 R8 误删导致运行时崩溃）
+#############################################
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
+-keep @androidx.room.Entity class *
+-keep @androidx.room.Dao class *
+-keep @androidx.room.Database class *
+-keepclassmembers class * {
+    @androidx.room.* <methods>;
+}
+-keep class **.*_Impl { *; }
+-keepclassmembers class **.*_Impl { *; }
+-keep class androidx.room.** { *; }

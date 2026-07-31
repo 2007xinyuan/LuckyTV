@@ -1,0 +1,188 @@
+{
+ "logo": "https://ncstatic-file.clewm.net/rsrc/2025/0930/20/945a6372224243d3f3d63cb309c0b7b1.png",
+ "spider": "https://ncstatic-file.clewm.net/rsrc/2026/0731/14/896ff0bd21906fe9812402eaff8d44b6.jpg;md5;6a12b77fcaf9b8d15e7da1a065cc788e",
+ "wallpaper": "http://127.0.0.1:9978/proxy?do=wallpaper",
+ "sites": [
+  {
+   "key": "Cat_聚合儿歌",
+   "name": "👶聚合丨儿童",
+   "type": 3,
+   "api": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/js/erge_juhe.js",
+   "searchable": 1,
+   "quickSearch": 0,
+   "filterable": 1
+  },
+  {
+   "key": "哔哩少儿",
+   "name": "🅰少儿┃哔哩",
+   "type": 3,
+   "api": "csp_Bili",
+   "searchable": 0,
+   "quickSearch": 0,
+   "filterable": 0,
+   "ext": {
+    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/少儿合集.json"
+   },
+   "style": {
+    "type": "rect",
+    "ratio": 1.597
+   }
+  },
+  {
+   "key": "口才",
+   "name": "🧒口才┃儿童",
+   "type": 3,
+   "api": "csp_Bili",
+   "searchable": 0,
+   "quickSearch": 0,
+   "filterable": 0,
+   "ext": {
+    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/儿童口才.json"
+   },
+   "style": {
+    "type": "rect",
+    "ratio": 1.597
+   }
+  },
+  {
+   "key": "拼音",
+   "name": "🧒拼音┃儿童",
+   "type": 3,
+   "api": "csp_Bili",
+   "searchable": 0,
+   "quickSearch": 0,
+   "filterable": 0,
+   "ext": {
+    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/儿童拼音.json"
+   },
+   "style": {
+    "type": "rect",
+    "ratio": 1.597
+   }
+  },
+  {
+   "key": "识字",
+   "name": "🧒识字┃儿童",
+   "type": 3,
+   "api": "csp_Bili",
+   "searchable": 0,
+   "quickSearch": 0,
+   "filterable": 0,
+   "ext": {
+    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/儿童识字.json"
+   },
+   "style": {
+    "type": "rect",
+    "ratio": 1.597
+   }
+  },
+  {
+   "key": "思维",
+   "name": "🧒思维┃儿童",
+   "type": 3,
+   "api": "csp_Bili",
+   "searchable": 0,
+   "quickSearch": 0,
+   "filterable": 0,
+   "ext": {
+    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/儿童思维.json"
+   },
+   "style": {
+    "type": "rect",
+    "ratio": 1.597
+   }
+  },
+  {
+   "key": "英语",
+   "name": "🧒英语┃儿童",
+   "type": 3,
+   "api": "csp_Bili",
+   "searchable": 0,
+   "quickSearch": 0,
+   "filterable": 0,
+   "ext": {
+    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/儿童英语.json"
+   },
+   "style": {
+    "type": "rect",
+    "ratio": 1.597
+   }
+  },
+  {
+   "key": "科学",
+   "name": "🧒科学┃哔哩",
+   "type": 3,
+   "api": "csp_Bili",
+   "searchable": 0,
+   "quickSearch": 0,
+   "filterable": 0,
+   "ext": {
+    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/小灯塔科学.json"
+   },
+   "style": {
+    "type": "rect",
+    "ratio": 1.597
+   }
+  },
+  {
+   "key": "国学",
+   "name": "🧒国学┃哔哩",
+   "type": 3,
+   "api": "csp_Bili",
+   "searchable": 0,
+   "quickSearch": 0,
+   "filterable": 0,
+   "ext": {
+    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/小灯塔国学.json"
+   },
+   "style": {
+    "type": "rect",
+    "ratio": 1.597
+   }
+  },
+  {
+   "key": "地理",
+   "name": "🧒地理┃哔哩",
+   "type": 3,
+   "api": "csp_Bili",
+   "searchable": 0,
+   "quickSearch": 0,
+   "filterable": 0,
+   "ext": {
+    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/小灯塔地理.json"
+   },
+   "style": {
+    "type": "rect",
+    "ratio": 1.597
+   }
+  },
+  {
+   "key": "编程",
+   "name": "🧒编程┃哔哩",
+   "type": 3,
+   "api": "csp_Bili",
+   "searchable": 0,
+   "quickSearch": 0,
+   "filterable": 0,
+   "ext": {
+    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/儿童编程.json"
+   },
+   "style": {
+    "type": "rect",
+    "ratio": 1.597
+   }
+  }
+ ],
+ "lives": [],
+ "parses": []
+}

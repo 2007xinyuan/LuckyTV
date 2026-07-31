@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Lucky乐园</string>
     <string name="app_home">Home</string>
-    <string name="app_source">http://tv.nxog.top/m/</string>
+    <string name="app_source">https://cdn.jsdmirror.com/gh/2007xinyuan/LuckyTV@main/app/src/main/assets/children_config.json</string>
 
     // Home Page //
     <string name="hm_ok">Load Complete</string>
