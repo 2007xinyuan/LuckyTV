@@ -270,7 +270,7 @@ public class HomeActivity extends BaseActivity {
                 if(dataInitOk && jarInitOk){
                     String cspCachePath = FileUtils.getFilePath()+"/csp/";
                     String jar=ApiConfig.get().getHomeSourceBean().getJar();
-                    String jarUrl=!jar.isEmpty()?jar:ApiConfig.get().getSpider();
+                    String jarUrl=(jar != null && !jar.isEmpty()) ? jar : ApiConfig.get().getSpider();
                     File cspCacheDir = new File(cspCachePath + MD5.string2MD5(jarUrl)+".jar");
                     if (!cspCacheDir.exists()){
                         reloadHome();
