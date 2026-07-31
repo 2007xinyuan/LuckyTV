@@ -20,6 +20,8 @@ import com.lucky.kidstv.util.DefaultConfig;
 import com.lucky.kidstv.util.HawkConfig;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.XXPermissions;
+import com.hjq.permissions.permission.PermissionLists;
+import com.hjq.permissions.permission.base.IPermission;
 import com.orhanobut.hawk.Hawk;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -212,24 +214,19 @@ public class ApiDialog extends BaseDialog {
         findViewById(R.id.storagePermission).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (XXPermissions.isGranted(getContext(), DefaultConfig.StoragePermissionGroup())) {
+                if (XXPermissions.isGrantedPermission(getContext(), PermissionLists.getManageExternalStoragePermission())) {
                     Toast.makeText(getContext(), "已获得存储权限", Toast.LENGTH_SHORT).show();
                 } else {
                     XXPermissions.with(getContext())
-                            .permission(DefaultConfig.StoragePermissionGroup())
-                            .request(new OnPermissionCallback() {
-                                @Override
-                                public void onGranted(List<String> permissions, boolean all) {
-                                    if (all) {
-                                        Toast.makeText(getContext(), "已获得存储权限", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-
-                                @Override
-                                public void onDenied(List<String> permissions, boolean never) {
-                                    if (never) {
+                            .permission(PermissionLists.getManageExternalStoragePermission())
+                            .request((grantedList, deniedList) -> {
+                                if (deniedList.isEmpty()) {
+                                    Toast.makeText(getContext(), "已获得存储权限", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    boolean doNotAskAgain = XXPermissions.isDoNotAskAgainPermissions((Activity) getContext(), deniedList);
+                                    if (doNotAskAgain) {
                                         Toast.makeText(getContext(), "获取存储权限失败,请在系统设置中开启", Toast.LENGTH_SHORT).show();
-                                        XXPermissions.startPermissionActivity((Activity) getContext(), permissions);
+                                        XXPermissions.startPermissionActivity(getContext(), PermissionLists.getManageExternalStoragePermission());
                                     } else {
                                         Toast.makeText(getContext(), "获取存储权限失败", Toast.LENGTH_SHORT).show();
                                     }

@@ -12,6 +12,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.hjq.permissions.OnPermissionCallback;
+import com.hjq.permissions.XXPermissions;
+import com.hjq.permissions.permission.PermissionLists;
+import com.hjq.permissions.permission.base.IPermission;
 import com.lucky.kidstv.R;
 import com.lucky.kidstv.base.App;
 import com.lucky.kidstv.data.AppDataManager;
@@ -19,8 +23,6 @@ import com.lucky.kidstv.ui.activity.HomeActivity;
 import com.lucky.kidstv.ui.adapter.BackupAdapter;
 import com.lucky.kidstv.util.DefaultConfig;
 import com.lucky.kidstv.util.FileUtils;
-import com.hjq.permissions.OnPermissionCallback;
-import com.hjq.permissions.XXPermissions;
 import com.owen.tvrecyclerview.widget.TvRecyclerView;
 
 import org.jetbrains.annotations.NotNull;
@@ -65,23 +67,18 @@ public class BackupDialog extends BaseDialog {
         findViewById(R.id.storagePermission).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (XXPermissions.isGranted(getContext(), DefaultConfig.StoragePermissionGroup())) {
+                if (XXPermissions.isGrantedPermission(getContext(), PermissionLists.getManageExternalStoragePermission())) {
                     Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_permission_ok), Toast.LENGTH_SHORT).show();
                 } else {
                     XXPermissions.with(getContext())
-                            .permission(DefaultConfig.StoragePermissionGroup())
-                            .request(new OnPermissionCallback() {
-                                @Override
-                                public void onGranted(List<String> permissions, boolean all) {
-                                    if (all) {
-                                        adapter.setNewData(allBackup());
-                                        Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_permission_ok), Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-
-                                @Override
-                                public void onDenied(List<String> permissions, boolean never) {
-                                    if (never) {
+                            .permission(PermissionLists.getManageExternalStoragePermission())
+                            .request((grantedList, deniedList) -> {
+                                if (deniedList.isEmpty()) {
+                                    adapter.setNewData(allBackup());
+                                    Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_permission_ok), Toast.LENGTH_SHORT).show();
+                                } else {
+                                    boolean doNotAskAgain = XXPermissions.isDoNotAskAgainPermissions((Activity) getContext(), deniedList);
+                                    if (doNotAskAgain) {
                                         Toast.makeText(getContext(), HomeActivity.getRes().getString(R.string.set_permission_fail2), Toast.LENGTH_SHORT).show();
                                         Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                         intent.setData(android.net.Uri.parse("package:" + getContext().getPackageName()));
