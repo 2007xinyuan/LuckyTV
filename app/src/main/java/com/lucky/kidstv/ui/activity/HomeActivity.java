@@ -145,6 +145,17 @@ public class HomeActivity extends BaseActivity {
         App.startWebserver();
         initView();
         initViewModel();
+        // 远程升级：启动 8 秒后静默检查（不打扰首页加载）
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    UpdateManager.checkUpdate(HomeActivity.this, false);
+                } catch (Throwable th) {
+                    th.printStackTrace();
+                }
+            }
+        }, 8000);
         useCacheConfig = false;
         Intent intent = getIntent();
         if (intent != null && intent.getExtras() != null) {
