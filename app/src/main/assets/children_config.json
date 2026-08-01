@@ -5,7 +5,7 @@
  "sites": [
   {
    "key": "量子动画",
-   "name": "量子动画",
+   "name": "主源|量子",
    "type": 1,
    "api": "https://cj.lziapi.com/api.php/provide/vod/?ac=list",
    "searchable": 1,
@@ -18,6 +18,29 @@
    ]
   },
   {
+   "key": "非凡动画",
+   "name": "备用|非凡",
+   "type": 1,
+   "api": "https://api.ffzyapi.com/api.php/provide/vod/?ac=list",
+   "searchable": 1,
+   "quickSearch": 1,
+   "filterable": 1,
+   "categories": [
+    "动漫片",
+    "国产动漫",
+    "欧美动漫"
+   ]
+  },
+  {
+   "key": "动画片大全",
+   "name": "动画|大全",
+   "type": 3,
+   "api": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/js/%E5%8A%A8%E7%94%BB%E7%89%87%E5%A4%A7%E5%85%A8.js",
+   "searchable": 1,
+   "quickSearch": 1,
+   "filterable": 1
+  },
+  {
    "key": "哔哩少儿",
    "name": "少儿|哔哩",
    "type": 3,
@@ -27,7 +50,7 @@
    "filterable": 0,
    "ext": {
     "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/少儿合集.json"
+    "json": "https://cdn.jsdmirror.com/gh/2007xinyuan/LuckyTV@main/app/src/main/assets/bili_age.json"
    },
    "style": {
     "type": "rect",
@@ -53,7 +76,7 @@
    "filterable": 0,
    "ext": {
     "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/儿童口才.json"
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%84%BF%E7%AB%A5%E5%8F%A3%E6%89%8D.json"
    },
    "style": {
     "type": "rect",
@@ -70,7 +93,7 @@
    "filterable": 0,
    "ext": {
     "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/儿童拼音.json"
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%84%BF%E7%AB%A5%E6%8B%BC%E9%9F%B3.json"
    },
    "style": {
     "type": "rect",
@@ -87,7 +110,7 @@
    "filterable": 0,
    "ext": {
     "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/儿童识字.json"
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%84%BF%E7%AB%A5%E8%AF%86%E5%AD%97.json"
    },
    "style": {
     "type": "rect",
@@ -104,7 +127,7 @@
    "filterable": 0,
    "ext": {
     "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/儿童思维.json"
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%84%BF%E7%AB%A5%E6%80%9D%E7%BB%B4.json"
    },
    "style": {
     "type": "rect",
@@ -121,7 +144,7 @@
    "filterable": 0,
    "ext": {
     "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/儿童英语.json"
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%84%BF%E7%AB%A5%E8%8B%B1%E8%AF%AD.json"
    },
    "style": {
     "type": "rect",
@@ -138,7 +161,7 @@
    "filterable": 0,
    "ext": {
     "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/小灯塔科学.json"
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%B0%8F%E7%81%AF%E5%A1%94%E7%A7%91%E5%AD%A6.json"
    },
    "style": {
     "type": "rect",
@@ -155,7 +178,7 @@
    "filterable": 0,
    "ext": {
     "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/小灯塔国学.json"
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%B0%8F%E7%81%AF%E5%A1%94%E5%9B%BD%E5%AD%A6.json"
    },
    "style": {
     "type": "rect",
@@ -172,7 +195,7 @@
    "filterable": 0,
    "ext": {
     "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/小灯塔地理.json"
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%B0%8F%E7%81%AF%E5%A1%94%E5%9C%B0%E7%90%86.json"
    },
    "style": {
     "type": "rect",
@@ -189,7 +212,7 @@
    "filterable": 0,
    "ext": {
     "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/Bil/儿童编程.json"
+    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%84%BF%E7%AB%A5%E7%BC%96%E7%A8%8B.json"
    },
    "style": {
     "type": "rect",

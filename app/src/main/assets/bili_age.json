@@ -1,0 +1,112 @@
+{
+ "class": [
+  {
+   "type_name": "0-3岁|宝宝巴士",
+   "type_id": "宝宝巴士动画"
+  },
+  {
+   "type_name": "0-3岁|小猪佩奇",
+   "type_id": "小猪佩奇"
+  },
+  {
+   "type_name": "0-3岁|超级宝贝JoJo",
+   "type_id": "超级宝贝jojo"
+  },
+  {
+   "type_name": "0-3岁|贝乐虎",
+   "type_id": "贝乐虎儿歌"
+  },
+  {
+   "type_name": "3-6岁|汪汪队立大功",
+   "type_id": "汪汪队立大功"
+  },
+  {
+   "type_name": "3-6岁|布鲁伊Bluey",
+   "type_id": "布鲁伊 bluey"
+  },
+  {
+   "type_name": "3-6岁|海底小纵队",
+   "type_id": "海底小纵队"
+  },
+  {
+   "type_name": "3-6岁|超级飞侠",
+   "type_id": "超级飞侠"
+  },
+  {
+   "type_name": "3-6岁|托马斯小火车",
+   "type_id": "托马斯小火车"
+  },
+  {
+   "type_name": "3-6岁|小猪佩奇",
+   "type_id": "小猪佩奇"
+  },
+  {
+   "type_name": "3-6岁|天线宝宝",
+   "type_id": "天线宝宝"
+  },
+  {
+   "type_name": "3-6岁|米奇妙妙屋",
+   "type_id": "米奇妙妙屋"
+  },
+  {
+   "type_name": "6-9岁|奥特曼",
+   "type_id": "奥特曼"
+  },
+  {
+   "type_name": "6-9岁|铠甲勇士",
+   "type_id": "铠甲勇士"
+  },
+  {
+   "type_name": "6-9岁|数码宝贝",
+   "type_id": "数码宝贝"
+  },
+  {
+   "type_name": "6-9岁|哆啦A梦",
+   "type_id": "哆啦A梦"
+  },
+  {
+   "type_name": "6-9岁|名侦探柯南",
+   "type_id": "名侦探柯南"
+  },
+  {
+   "type_name": "6-9岁|宝可梦",
+   "type_id": "宝可梦"
+  },
+  {
+   "type_name": "9-12岁|斗罗大陆",
+   "type_id": "斗罗大陆"
+  },
+  {
+   "type_name": "9-12岁|秦时明月",
+   "type_id": "秦时明月"
+  },
+  {
+   "type_name": "9-12岁|海贼王",
+   "type_id": "海贼王"
+  },
+  {
+   "type_name": "9-12岁|火影忍者",
+   "type_id": "火影忍者"
+  },
+  {
+   "type_name": "9-12岁|西游记",
+   "type_id": "西游记动画"
+  },
+  {
+   "type_name": "9-12岁|三国演义",
+   "type_id": "三国演义动画"
+  },
+  {
+   "type_name": "全龄|熊出没",
+   "type_id": "熊出没"
+  },
+  {
+   "type_name": "全龄|喜羊羊",
+   "type_id": "喜羊羊与灰太狼"
+  },
+  {
+   "type_name": "全龄|大头儿子",
+   "type_id": "大头儿子小头爸爸"
+  }
+ ]
+}
