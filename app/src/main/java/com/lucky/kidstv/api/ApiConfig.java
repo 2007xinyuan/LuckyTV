@@ -74,6 +74,8 @@ public class ApiConfig {
     public String wallpaper = "";
     public JsonArray livePlayHeaders;
     private final SourceBean emptyHome = new SourceBean();
+    // 儿童模式: 首页推荐白名单动画片名 (配置 homeVideos)
+    private List<String> homeVideos = new ArrayList<>();
 
     private final JarLoader jarLoader = new JarLoader();
     private final JsLoader jsLoader = new JsLoader();
@@ -354,6 +356,15 @@ public class ApiConfig {
         spider = DefaultConfig.safeJsonString(infoJson, "spider", "");
         // wallpaper
         wallpaper = DefaultConfig.safeJsonString(infoJson, "wallpaper", "");
+        // 儿童模式: 首页推荐白名单动画片名
+        homeVideos.clear();
+        if (infoJson.has("homeVideos")) {
+            JsonArray hv = infoJson.getAsJsonArray("homeVideos");
+            for (JsonElement e : hv) {
+                String v = e.getAsString().trim();
+                if (!v.isEmpty()) homeVideos.add(v);
+            }
+        }
         // 直播播放请求头
         livePlayHeaders = infoJson.getAsJsonArray("livePlayHeaders");
         // 远端站点源
@@ -382,6 +393,7 @@ public class ApiConfig {
             sb.setCategories(DefaultConfig.safeJsonStringList(obj, "categories"));
             sb.setClickSelector(DefaultConfig.safeJsonString(obj, "click", ""));
             sb.setStyle(DefaultConfig.safeJsonString(obj, "style", ""));
+            sb.setHomeTid(DefaultConfig.safeJsonString(obj, "homeTid", ""));
             if (firstSite == null && sb.getHide() == 0)
                 firstSite = sb;
             sourceBeanList.put(siteKey, sb);
@@ -433,8 +445,10 @@ public class ApiConfig {
 
         String liveURL_final = null;
         try {
-            if (infoJson.has("lives") && infoJson.get("lives").getAsJsonArray() != null) {
-                JsonObject livesOBJ = infoJson.get("lives").getAsJsonArray().get(0).getAsJsonObject();
+            // 修复: lives 为空数组时 get(0) 抛 IndexOutOfBoundsException -> 首页配置解析中断
+            JsonArray livesArr = infoJson.has("lives") ? infoJson.getAsJsonArray("lives") : null;
+            if (livesArr != null && livesArr.size() > 0) {
+                JsonObject livesOBJ = livesArr.get(0).getAsJsonObject();
                 String lives = livesOBJ.toString();
                 int index = lives.indexOf("proxy://");
                 if (index != -1) {
@@ -495,9 +509,9 @@ public class ApiConfig {
 
                     // if FongMi Live URL Formatting exists
                     if (!lives.contains("type")) {
-                        loadLives(infoJson.get("lives").getAsJsonArray());
+                        loadLives(livesArr);
                     } else {
-                        JsonObject fengMiLives = infoJson.get("lives").getAsJsonArray().get(0).getAsJsonObject();
+                        JsonObject fengMiLives = livesArr.get(0).getAsJsonObject();
                         Hawk.put(HawkConfig.LIVE_PLAYER_TYPE, DefaultConfig.safeJsonInt(fengMiLives, "playerType", -1));
                         String type = fengMiLives.get("type").getAsString();
                         if (type.equals("0")) {
@@ -736,6 +750,10 @@ public class ApiConfig {
 
     public String getSpider() {
         return spider;
+    }
+
+    public List<String> getHomeVideos() {
+        return homeVideos;
     }
 
     public Spider getCSP(SourceBean sourceBean) {

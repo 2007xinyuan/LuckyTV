@@ -54,6 +54,13 @@ public class GridAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder> {
             return;
         }
 
+        TextView tvScore = helper.getView(R.id.tvScore);
+        if (item.score != null && !item.score.isEmpty() && !"0".equals(item.score) && !"0.0".equals(item.score)) {
+            tvScore.setText(item.score);
+            tvScore.setVisibility(View.VISIBLE);
+        } else {
+            tvScore.setVisibility(View.GONE);
+        }
         TextView tvYear = helper.getView(R.id.tvYear);
         if (item.year <= 0) {
             tvYear.setVisibility(View.GONE);

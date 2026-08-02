@@ -18,6 +18,8 @@ import com.lucky.kidstv.bean.AbsXml;
 import com.lucky.kidstv.bean.Movie;
 import com.lucky.kidstv.bean.MovieSort;
 import com.lucky.kidstv.bean.SourceBean;
+import com.lucky.kidstv.cache.RoomDataManger;
+import com.lucky.kidstv.cache.VodCollect;
 import com.lucky.kidstv.event.RefreshEvent;
 import com.lucky.kidstv.util.DefaultConfig;
 import com.lucky.kidstv.util.HawkConfig;
@@ -35,6 +37,7 @@ import com.google.gson.reflect.TypeToken;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.AbsCallback;
 import com.lzy.okgo.model.Response;
+import com.lzy.okgo.request.GetRequest;
 import com.orhanobut.hawk.Hawk;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
@@ -47,9 +50,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -119,6 +125,11 @@ public class SourceViewModel extends ViewModel {
             return size() > 5;
         }
     };
+
+    // 儿童模式: 清空首页推荐缓存(收藏变化后强制刷新)
+    public void clearSortCache() {
+        sortCache.clear();
+    }
     // homeContent
     public void getSort(final String sourceKey) {
         LOG.i("echo--getSort-start");
@@ -197,9 +208,14 @@ public class SourceViewModel extends ViewModel {
             };
             spThreadPool.execute(waitResponse);
         } else if (type == 0 || type == 1) {
-            OkGo.<String>get(sourceBean.getApi())
-                    .tag(sourceBean.getKey() + "_sort")
-                    .execute(new AbsCallback<String>() {
+            GetRequest<String> okGo = OkGo.<String>get(sourceBean.getApi())
+                    .tag(sourceBean.getKey() + "_sort");
+            // 儿童模式: 首页推荐指定动画分类 (配置 homeTid, 量子源动漫片=4/日韩动漫=30)
+            String homeTid = sourceBean.getHomeTid();
+            if (!TextUtils.isEmpty(homeTid)) {
+                okGo.params("t", homeTid);
+            }
+            okGo.execute(new AbsCallback<String>() {
                         @Override
                         public String convertResponse(okhttp3.Response response) throws Throwable {
                             if (response.body() != null) {
@@ -219,6 +235,7 @@ public class SourceViewModel extends ViewModel {
                                 String json = response.body();
                                 sortXml = sortJson(sortResult, json);
                             }
+                            LOG.i("echo-getSort-onSuccess: sortXml=" + (sortXml == null ? "NULL" : ("classes=" + (sortXml.classes == null || sortXml.classes.sortList == null ? 0 : sortXml.classes.sortList.size()) + " list=" + (sortXml.list == null ? "null" : (sortXml.list.videoList == null ? "vlist-null" : sortXml.list.videoList.size())))));
                             if (sortXml != null && Hawk.get(HawkConfig.HOME_REC, 0) == 1 && sortXml.list != null && sortXml.list.videoList != null && sortXml.list.videoList.size() > 0) {
                                 ArrayList<String> ids = new ArrayList<>();
                                 for (Movie.Video vod : sortXml.list.videoList) {
@@ -229,8 +246,8 @@ public class SourceViewModel extends ViewModel {
                                     @Override
                                     public void done(List<Movie.Video> videos) {
                                         finalSortXml.videoList = videos;
-                                        sortResult.postValue(finalSortXml);
-                                        sortCache.put(sourceKey, finalSortXml);
+                                        // 儿童模式: 首页推荐 = 白名单动画(安全警长啦咘啦哆/布鲁伊/汪汪队等) + 收藏影片, 过滤B站解说/自制
+                                        injectHomeVideos(sourceBean, finalSortXml, sourceKey);
                                     }
                                 });
                             } else {
@@ -242,6 +259,7 @@ public class SourceViewModel extends ViewModel {
                         @Override
                         public void onError(Response<String> response) {
                             super.onError(response);
+                            LOG.e("echo-getSort-onError: " + (response.getException() == null ? "no-exception" : response.getException().getMessage()));
                             sortResult.postValue(null);
                         }
                     });
@@ -295,6 +313,7 @@ public class SourceViewModel extends ViewModel {
                         @Override
                         public void onError(Response<String> response) {
                             super.onError(response);
+                            LOG.e("echo-getSort-onError: " + (response.getException() == null ? "no-exception" : response.getException().getMessage()));
                             sortResult.postValue(null);
                         }
                     });
@@ -404,6 +423,146 @@ public class SourceViewModel extends ViewModel {
 
     interface HomeRecCallback {
         void done(List<Movie.Video> videos);
+    }
+
+    // 儿童模式: 首页推荐注入 = 配置白名单动画(按片名搜索所有type0/1源) + 用户收藏影片; 过滤B站解说/自制视频
+    private void injectHomeVideos(final SourceBean sourceBean, final AbsSortXml sortXml, final String sourceKey) {
+        spThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final List<Movie.Video> merged = new ArrayList<>();
+                    final Set<String> seen = new HashSet<>();
+                    // 1) 白名单动画: 逐个搜索所有 type 0/1 源 (主源优先, 未命中换备用源)
+                    List<String> whitelist = ApiConfig.get().getHomeVideos();
+                    if (whitelist != null && !whitelist.isEmpty()) {
+                        for (final String name : whitelist) {
+                            if (TextUtils.isEmpty(name)) continue;
+                            boolean hit = false;
+                            List<SourceBean> candidates = new ArrayList<>();
+                            candidates.add(sourceBean);
+                            for (SourceBean sb : ApiConfig.get().getSourceBeanList()) {
+                                if (sb == null || sb.getKey() == null) continue;
+                                if (sourceBean != null && sourceBean.getKey() != null && sb.getKey().equals(sourceBean.getKey())) continue;
+                                if (sb.getType() == 0 || sb.getType() == 1) candidates.add(sb);
+                            }
+                            for (final SourceBean cand : candidates) {
+                                if (hit) break;
+                                final CountDownLatch latch = new CountDownLatch(1);
+                                final List<Movie.Video> found = new ArrayList<>();
+                                OkGo.<String>get(cand.getApi())
+                                        .params("wd", name)
+                                        .params(cand.getType() == 1 ? "ac" : null, cand.getType() == 1 ? "detail" : null)
+                                        .tag("home_whitelist")
+                                        .execute(new AbsCallback<String>() {
+                                            @Override
+                                            public String convertResponse(okhttp3.Response response) throws Throwable {
+                                                if (response.body() != null) return response.body().string();
+                                                throw new IllegalStateException("网络请求错误");
+                                            }
+                                            @Override
+                                            public void onSuccess(Response<String> response) {
+                                                try {
+                                                    String json = response.body();
+                                                    if (!TextUtils.isEmpty(json)) {
+                                                        AbsXml absXml = (cand.getType() == 0) ? xml(null, json, cand.getKey()) : json(null, json, cand.getKey());
+                                                        if (absXml != null && absXml.movie != null && absXml.movie.videoList != null) {
+                                                            for (Movie.Video v : absXml.movie.videoList) {
+                                                                if (isKidFriendlyAnime(v, name)) {
+                                                                    v.sourceKey = cand.getKey();
+                                                                    found.add(v);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                } catch (Throwable th) {
+                                                    LOG.e("echo-injectHomeVideos-search-ERR: " + th.getMessage());
+                                                } finally {
+                                                    latch.countDown();
+                                                }
+                                            }
+                                            @Override
+                                            public void onError(Response<String> response) {
+                                                super.onError(response);
+                                                latch.countDown();
+                                            }
+                                        });
+                                try {
+                                    latch.await(8, TimeUnit.SECONDS);
+                                } catch (InterruptedException ignored) {
+                                }
+                                if (!found.isEmpty()) {
+                                    for (Movie.Video v : found) {
+                                        String key = (v.id == null ? "" : v.id) + "_" + (v.name == null ? "" : v.name);
+                                        if (seen.add(key)) merged.add(v);
+                                    }
+                                    hit = true;
+                                    LOG.i("echo-injectHomeVideos-hit: " + name + " @ " + cand.getKey() + " count=" + found.size());
+                                }
+                            }
+                        }
+                    }
+                    // 2) 用户收藏影片 (收藏自动进首页推荐)
+                    try {
+                        List<VodCollect> collects = RoomDataManger.getAllVodCollect();
+                        if (collects != null && !collects.isEmpty()) {
+                            Collections.sort(collects, new java.util.Comparator<VodCollect>() {
+                                @Override
+                                public int compare(VodCollect a, VodCollect b) {
+                                    return Long.compare(b.updateTime, a.updateTime);
+                                }
+                            });
+                            for (VodCollect c : collects) {
+                                if (c == null || TextUtils.isEmpty(c.name)) continue;
+                                String key = (c.vodId == null ? "" : c.vodId) + "_" + c.name;
+                                if (seen.add(key)) {
+                                    Movie.Video v = new Movie.Video();
+                                    v.id = c.vodId;
+                                    v.name = c.name;
+                                    v.pic = c.pic;
+                                    v.sourceKey = c.sourceKey == null ? sourceKey : c.sourceKey;
+                                    v.type = "收藏";
+                                    merged.add(v);
+                                }
+                            }
+                        }
+                    } catch (Throwable th) {
+                        LOG.e("echo-injectHomeVideos-collect-ERR: " + th.getMessage());
+                    }
+                    // 3) 原站点推荐兜底(未命中白名单时保持有内容)
+                    if (merged.isEmpty() && sortXml != null && sortXml.videoList != null) {
+                        merged.addAll(sortXml.videoList);
+                    }
+                    if (sortXml != null) {
+                        sortXml.videoList = merged;
+                        sortResult.postValue(sortXml);
+                        sortCache.put(sourceKey, sortXml);
+                    }
+                    LOG.i("echo-injectHomeVideos-done: whitelist=" + (whitelist == null ? 0 : whitelist.size()) + " merged=" + merged.size());
+                } catch (Throwable th) {
+                    LOG.e("echo-injectHomeVideos-ERR: " + th.getMessage());
+                    if (sortXml != null) {
+                        sortResult.postValue(sortXml);
+                        sortCache.put(sourceKey, sortXml);
+                    }
+                }
+            }
+        });
+    }
+
+    // 适龄过滤: 白名单动画必须命中片名关键词, 且排除B站解说/自制/混剪/盘点/预告等
+    private boolean isKidFriendlyAnime(Movie.Video v, String whitelistName) {
+        if (v == null || v.name == null) return false;
+        String n = v.name.trim();
+        String[] bad = {"解说", "自制", "混剪", "盘点", "预告", "花絮", "吐槽", "剪辑", "UP主", "配音", "合集", "片段"};
+        for (String b : bad) {
+            if (n.contains(b)) return false;
+        }
+        // 必须包含白名单关键词(容错: 至少含前3个字)
+        if (whitelistName == null || whitelistName.isEmpty()) return false;
+        String w = whitelistName.trim();
+        if (!n.contains(w) && !n.contains(w.substring(0, Math.min(3, w.length())))) return false;
+        return true;
     }
 
     //    homeVideoContent
@@ -885,8 +1044,8 @@ public class SourceViewModel extends ViewModel {
     private AbsSortXml sortJson(MutableLiveData<AbsSortXml> result, String json) {
         try {
             JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
-            AbsSortJson sortJson = gson.fromJson(obj, new TypeToken<AbsSortJson>() {
-            }.getType());
+            // 修复: 不用 TypeToken (R8 混淆丢泛型签名导致 gson 抛 IllegalStateException)
+            AbsSortJson sortJson = gson.fromJson(obj, AbsSortJson.class);
             AbsSortXml data = sortJson.toAbsSortXml();
             try {
                 if (obj.has("filters")) {
@@ -915,6 +1074,7 @@ public class SourceViewModel extends ViewModel {
             }
             return data;
         } catch (Exception e) {
+            LOG.e("echo-sortJson-ERR: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             return null;
         }
     }
@@ -1031,8 +1191,7 @@ public class SourceViewModel extends ViewModel {
                                                             String res = response.body();
                                                             if (!TextUtils.isEmpty(res)) {
                                                                 try {
-                                                                    AbsJson absJson = gson.fromJson(res, new TypeToken<AbsJson>() {
-                                                                    }.getType());
+                                                                    AbsJson absJson = gson.fromJson(res, AbsJson.class);
                                                                     resData[0] = absJson.toAbsXml();
                                                                     absXml(resData[0], sb.getKey());
                                                                 } catch (Exception e) {
@@ -1057,8 +1216,7 @@ public class SourceViewModel extends ViewModel {
                                                 String res = sp.detailContent(ids);
                                                 if (!TextUtils.isEmpty(res)) {
                                                     try {
-                                                        AbsJson absJson = gson.fromJson(res, new TypeToken<AbsJson>() {
-                                                        }.getType());
+                                                        AbsJson absJson = gson.fromJson(res, AbsJson.class);
                                                         resData[0] = absJson.toAbsXml();
                                                         absXml(resData[0], sb.getKey());
                                                     } catch (Exception e) {
@@ -1234,8 +1392,7 @@ public class SourceViewModel extends ViewModel {
                     "\t\t\"vod_play_url\": \"0$magnet:?xt=urn:btih:9e9358b946c427962533472efdd2efd9e9e38c67&dn=%e9%98%b3%e5%85%89%e7%94%b5%e5%bd%b1www.ygdy8.com.%e7%83%ad%e8%a1%80.2022.BD.1080P.%e9%9f%a9%e8%af%ad%e4%b8%ad%e8%8b%b1%e5%8f%8c%e5%ad%97.mkv&tr=udp%3a%2f%2ftracker.opentrackr.org%3a1337%2fannounce&tr=udp%3a%2f%2fexodus.desync.com%3a6969%2fannounce\"\n" +
                     "\t}]\n" +
                     "}";*/
-            AbsJson absJson = gson.fromJson(json, new TypeToken<AbsJson>() {
-            }.getType());
+            AbsJson absJson = gson.fromJson(json, AbsJson.class);
             AbsXml data = absJson.toAbsXml();
             absXml(data, sourceKey);
             if (searchResult == result) {

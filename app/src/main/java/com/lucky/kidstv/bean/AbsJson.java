@@ -128,6 +128,7 @@ public class AbsJson implements Serializable {
             }
             video.state = vod_state;
             video.note = vod_remarks;
+            video.score = vod_score;
             video.actor = vod_actor;
             video.director = vod_director;
             Movie.Video.UrlBean urlBean = new Movie.Video.UrlBean();
@@ -147,6 +148,25 @@ public class AbsJson implements Serializable {
                     }
                     urlInfo.urls = playUrls[i];
                     infoList.add(urlInfo);
+                }
+                // 儿童模式: 直链播放线路优先 (m3u8/mp4/flv 直链排在嗅探页之前, 保证默认线路可直接播放)
+                if (infoList.size() > 1) {
+                    java.util.Collections.sort(infoList, new java.util.Comparator<Movie.Video.UrlBean.UrlInfo>() {
+                        private boolean isDirect(String urls) {
+                            if (urls == null) return false;
+                            String u = urls.toLowerCase();
+                            // 直链: 含 .m3u8/.mp4/.flv 且不含 share/ 嗅探路径
+                            return (u.contains(".m3u8") || u.contains(".mp4") || u.contains(".flv"))
+                                    && !u.contains("/share/");
+                        }
+                        @Override
+                        public int compare(Movie.Video.UrlBean.UrlInfo a, Movie.Video.UrlBean.UrlInfo b) {
+                            boolean da = isDirect(a.urls), db = isDirect(b.urls);
+                            if (da && !db) return -1;
+                            if (!da && db) return 1;
+                            return 0;
+                        }
+                    });
                 }
                 urlBean.infoList = infoList;
             }

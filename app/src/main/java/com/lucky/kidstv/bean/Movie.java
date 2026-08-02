@@ -51,6 +51,8 @@ public class Movie implements Serializable {
         public int year;
         @XStreamAlias("state")
         public String state;
+        @XStreamAlias("score")
+        public String score;
         @XStreamAlias("note")//描述集数或者影片信息<![CDATA[共40集]]>
         public String note;
         @XStreamAlias("actor")//演员<![CDATA[张国立,蒋欣,高鑫,曹艳艳,王维维,韩丹彤,孟秀,王新]]>

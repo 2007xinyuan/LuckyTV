@@ -381,6 +381,8 @@ public class DetailActivity extends BaseActivity {
                     Toast.makeText(DetailActivity.this, getString(R.string.det_fav_del), Toast.LENGTH_SHORT).show();
                     tvCollect.setText(getString(R.string.det_fav_unstar));
                 }
+                // 儿童模式: 收藏变化 -> 通知首页刷新推荐(收藏自动进首页)
+                EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_COLLECT_CHANGE));
             }
         });
         tvDesc.setOnClickListener(new View.OnClickListener() {

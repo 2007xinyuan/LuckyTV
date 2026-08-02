@@ -18,6 +18,7 @@ public class SourceBean {
     private int playerType; // 0 system 1 ikj 2 exo 10 mxplayer -1 以参数设置页面的为准
     private String clickSelector; // 需要点击播放的嗅探站点selector   ddrk.me;#id
     private String style; // 展示风格
+    private String homeTid; // 儿童模式: 首页推荐指定分类ID (macCMS t 参数)
     public String getKey() {
         return key;
     }
@@ -130,11 +131,19 @@ public class SourceBean {
         this.clickSelector = clickSelector;
     }
 
-    public String getStyle() { 
-        return style; 
+    public String getStyle() {
+        return style;
     }
 
-    public void setStyle(String style) { 
-        this.style = style; 
+    public void setStyle(String style) {
+        this.style = style;
+    }
+
+    public String getHomeTid() {
+        return homeTid;
+    }
+
+    public void setHomeTid(String homeTid) {
+        this.homeTid = homeTid;
     }
 }

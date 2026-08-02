@@ -335,3 +335,13 @@
 -keep class **.*_Impl { *; }
 -keepclassmembers class **.*_Impl { *; }
 -keep class androidx.room.** { *; }
+
+#############################################
+# Gson 反序列化 bean（防 R8 混淆字段名导致 gson 映射失败 / TypeToken 泛型丢失）
+#############################################
+-keep class com.lucky.kidstv.bean.AbsSortJson { *; }
+-keep class com.lucky.kidstv.bean.AbsJson { *; }
+-keep class com.lucky.kidstv.bean.AbsJsonVod { *; }
+-keep class com.lucky.kidstv.bean.Doh { *; }
+-keep class com.lucky.kidstv.bean.VodInfo { *; }
+-keepattributes Signature, InnerClasses, EnclosingMethod

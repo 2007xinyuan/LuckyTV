@@ -27,6 +27,7 @@ public class RefreshEvent {
     public static final int TYPE_FILTER_CHANGE = 16;
     public static final int TYPE_REFRESH_NOTIFY = 17;
     public static final int TYPE_SET_DANMU_SETTINGS = 18;
+    public static final int TYPE_COLLECT_CHANGE = 19;
     public int type;
     public Object obj;
 

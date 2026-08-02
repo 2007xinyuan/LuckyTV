@@ -66,6 +66,7 @@ import com.lucky.kidstv.util.FileUtils;
 import com.lucky.kidstv.util.HawkConfig;
 import com.lucky.kidstv.util.LOG;
 import com.lucky.kidstv.util.MD5;
+import com.lucky.kidstv.util.UpdateManager;
 import com.lucky.kidstv.viewmodel.SourceViewModel;
 import com.orhanobut.hawk.Hawk;
 import com.owen.tvrecyclerview.widget.TvRecyclerView;
@@ -744,6 +745,15 @@ public class HomeActivity extends BaseActivity {
         } else if (event.type == RefreshEvent.TYPE_FILTER_CHANGE) {
             if (currentView != null) {
 //                showFilterIcon((int) event.obj);
+            }
+        } else if (event.type == RefreshEvent.TYPE_COLLECT_CHANGE) {
+            // 儿童模式: 收藏变化 -> 强制刷新首页推荐(收藏影片自动进首页)
+            if (Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
+                skipNextUpdate = false;
+                if (dataInitOk && jarInitOk) {
+                    sourceViewModel.clearSortCache();
+                    sourceViewModel.getSort(ApiConfig.get().getHomeSourceBean().getKey());
+                }
             }
         }
     }
