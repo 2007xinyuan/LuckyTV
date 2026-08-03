@@ -130,6 +130,17 @@ public class SourceViewModel extends ViewModel {
     public void clearSortCache() {
         sortCache.clear();
     }
+
+    // 儿童模式: 适龄筛选 -> 年龄段标签; 0 全部 1 3-6岁 2 6-9岁 3 9-12岁; 未设置/未知回退 null(全量)
+    public static String getAgeFilter() {
+        int age = Hawk.get(HawkConfig.AGE_FILTER, 0);
+        switch (age) {
+            case 1: return "3-6";
+            case 2: return "6-9";
+            case 3: return "9-12";
+            default: return null;
+        }
+    }
     // homeContent
     public void getSort(final String sourceKey) {
         LOG.i("echo--getSort-start");
@@ -433,8 +444,8 @@ public class SourceViewModel extends ViewModel {
                 try {
                     final List<Movie.Video> merged = new ArrayList<>();
                     final Set<String> seen = new HashSet<>();
-                    // 1) 白名单动画: 逐个搜索所有 type 0/1 源 (主源优先, 未命中换备用源)
-                    List<String> whitelist = ApiConfig.get().getHomeVideos();
+                    // 1) 白名单动画: 逐个搜索所有 type 0/1 源 (主源优先, 未命中换备用源); 按适龄筛选(AGE_FILTER)过滤
+                    List<String> whitelist = ApiConfig.get().getHomeVideosByAge(getAgeFilter());
                     if (whitelist != null && !whitelist.isEmpty()) {
                         for (final String name : whitelist) {
                             if (TextUtils.isEmpty(name)) continue;

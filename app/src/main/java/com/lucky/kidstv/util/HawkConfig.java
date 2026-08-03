@@ -49,6 +49,7 @@ public class HawkConfig {
     // Other Settings
     public static final String DOH_URL = "doh_url";         // DNS
     public static final String DEFAULT_PARSE = "parse_default";
+    public static final String AGE_FILTER = "age_filter";            // 儿童模式适龄筛选: 0 全部 1 3-6岁 2 6-9岁 3 9-12岁
     public static final String PARSE_WEBVIEW = "parse_webview"; // true 系统 false xwalk
     public static final String SEARCH_VIEW = "search_view";     // 0 列表 1 缩略图
     public static final String SOURCES_FOR_SEARCH = "checked_sources_for_search";

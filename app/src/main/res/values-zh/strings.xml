@@ -55,6 +55,7 @@
     <string name="mn_home_type">推荐</string>
     <string name="mn_icon">按钮位置</string>
     <string name="mn_history_num">历史条数</string>
+    <string name="mn_age_filter">适龄筛选</string>
     <string name="mn_live_boot">启动时进直播</string>
     <string name="mn_wall_change">换张壁纸</string>
     <string name="mn_wall_load">壁纸更换中</string>

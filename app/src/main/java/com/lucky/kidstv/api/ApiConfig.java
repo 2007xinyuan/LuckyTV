@@ -76,6 +76,8 @@ public class ApiConfig {
     private final SourceBean emptyHome = new SourceBean();
     // 儿童模式: 首页推荐白名单动画片名 (配置 homeVideos)
     private List<String> homeVideos = new ArrayList<>();
+    // 儿童模式: 年龄段 -> 白名单动画 分组 (配置 ageGroups: {"3-6":[...],"6-9":[...],"9-12":[...]})
+    private Map<String, List<String>> ageGroups = new LinkedHashMap<>();
 
     private final JarLoader jarLoader = new JarLoader();
     private final JsLoader jsLoader = new JsLoader();
@@ -363,6 +365,21 @@ public class ApiConfig {
             for (JsonElement e : hv) {
                 String v = e.getAsString().trim();
                 if (!v.isEmpty()) homeVideos.add(v);
+            }
+        }
+        // 儿童模式: 年龄段 -> 白名单动画 分组 (ageGroups: {"3-6":[...],"6-9":[...],"9-12":[...]})
+        ageGroups.clear();
+        if (infoJson.has("ageGroups")) {
+            JsonObject ag = infoJson.getAsJsonObject("ageGroups");
+            for (Map.Entry<String, JsonElement> entry : ag.entrySet()) {
+                List<String> names = new ArrayList<>();
+                if (entry.getValue() != null && entry.getValue().isJsonArray()) {
+                    for (JsonElement e : entry.getValue().getAsJsonArray()) {
+                        String v = e.getAsString().trim();
+                        if (!v.isEmpty()) names.add(v);
+                    }
+                }
+                if (!names.isEmpty()) ageGroups.put(entry.getKey(), names);
             }
         }
         // 直播播放请求头
@@ -753,6 +770,19 @@ public class ApiConfig {
     }
 
     public List<String> getHomeVideos() {
+        return homeVideos;
+    }
+
+    public Map<String, List<String>> getAgeGroups() {
+        return ageGroups;
+    }
+
+    // 儿童模式: 按年龄段取白名单动画; 若该年龄段无配置或配置为空则回退到全量 homeVideos
+    public List<String> getHomeVideosByAge(String ageGroup) {
+        if (ageGroup != null && !ageGroup.isEmpty()) {
+            List<String> names = ageGroups.get(ageGroup);
+            if (names != null && !names.isEmpty()) return names;
+        }
         return homeVideos;
     }
 

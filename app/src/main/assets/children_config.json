@@ -2,6 +2,31 @@
  "logo": "https://ncstatic-file.clewm.net/rsrc/2025/0930/20/945a6372224243d3f3d63cb309c0b7b1.png",
  "spider": "https://ncstatic-file.clewm.net/rsrc/2026/0731/14/896ff0bd21906fe9812402eaff8d44b6.jpg;md5;6a12b77fcaf9b8d15e7da1a065cc788e",
  "wallpaper": "http://127.0.0.1:9978/proxy?do=wallpaper",
+ "ageGroups": {
+  "3-6": [
+   "小猪佩奇",
+   "萌鸡小队",
+   "宝宝巴士",
+   "超级飞侠",
+   "海底小纵队",
+   "汪汪队立大功"
+  ],
+  "6-9": [
+   "安全警长啦咘啦哆",
+   "布鲁伊",
+   "汪汪队立大功",
+   "超级飞侠",
+   "托马斯小火车",
+   "猪猪侠之竞速小英雄",
+   "萌鸡小队"
+  ],
+  "9-12": [
+   "熊出没",
+   "喜羊羊与灰太狼",
+   "巴啦啦小魔仙",
+   "猪猪侠之竞速小英雄"
+  ]
+ },
  "homeVideos": [
   "安全警长啦咘啦哆",
   "布鲁伊",
@@ -28,8 +53,8 @@
    "quickSearch": 1,
    "filterable": 1,
    "categories": [
-    "动画片",
     "国产动漫",
+    "日韩动漫",
     "欧美动漫"
    ]
   },

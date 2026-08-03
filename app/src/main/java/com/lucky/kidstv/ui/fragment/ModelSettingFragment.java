@@ -71,6 +71,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private TextView tvHomeIcon;
     private TextView tvHomeRec;
     private TextView tvHomeNum;
+    private TextView tvAgeFilter;
 
     // Player Section
     private TextView tvShowPreviewText;
@@ -117,6 +118,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvHomeRec.setText(getHomeRecName(Hawk.get(HawkConfig.HOME_REC, 0)));
         tvHomeNum = findViewById(R.id.tvHomeNum);
         tvHomeNum.setText(HistoryHelper.getHomeRecName(Hawk.get(HawkConfig.HOME_NUM, 0)));
+        tvAgeFilter = findViewById(R.id.tvAgeFilter);
+        tvAgeFilter.setText(getAgeFilterName(Hawk.get(HawkConfig.AGE_FILTER, 0)));
         // Player Section
         tvShowPreviewText = findViewById(R.id.showPreviewText);
         tvShowPreviewText.setText(Hawk.get(HawkConfig.SHOW_PREVIEW, true) ? "开启" : "关闭");
@@ -336,6 +339,44 @@ public class ModelSettingFragment extends BaseLazyFragment {
                     @Override
                     public String getDisplay(Integer val) {
                         return HistoryHelper.getHomeRecName(val);
+                    }
+                }, new DiffUtil.ItemCallback<Integer>() {
+                    @Override
+                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+                }, types, defaultPos);
+                dialog.show();
+            }
+        });
+        // Select Age Filter (儿童模式适龄筛选) ----------------------
+        findViewById(R.id.llAgeFilter).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                int defaultPos = Hawk.get(HawkConfig.AGE_FILTER, 0);
+                ArrayList<Integer> types = new ArrayList<>();
+                types.add(0);
+                types.add(1);
+                types.add(2);
+                types.add(3);
+                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
+                dialog.setTip("适龄筛选");
+                dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                    @Override
+                    public void click(Integer value, int pos) {
+                        Hawk.put(HawkConfig.AGE_FILTER, value);
+                        tvAgeFilter.setText(getAgeFilterName(value));
+                    }
+
+                    @Override
+                    public String getDisplay(Integer val) {
+                        return getAgeFilterName(val);
                     }
                 }, new DiffUtil.ItemCallback<Integer>() {
                     @Override
@@ -833,6 +874,19 @@ public class ModelSettingFragment extends BaseLazyFragment {
             return "观看历史";
         } else {
             return "豆瓣热播";
+        }
+    }
+
+    // 儿童模式适龄筛选: 0 全部 1 3-6岁 2 6-9岁 3 9-12岁
+    String getAgeFilterName(int type) {
+        if (type == 1) {
+            return "3-6岁";
+        } else if (type == 2) {
+            return "6-9岁";
+        } else if (type == 3) {
+            return "9-12岁";
+        } else {
+            return "全部";
         }
     }
 
