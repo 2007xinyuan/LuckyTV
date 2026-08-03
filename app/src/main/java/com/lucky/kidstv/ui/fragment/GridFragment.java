@@ -305,16 +305,26 @@ public class GridFragment extends BaseLazyFragment {
             public void onChanged(AbsXml absXml) {
 //                if(mGridView != null) mGridView.requestFocus();
                 if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && absXml.movie.videoList.size() > 0) {
+                    // 儿童模式: 适龄筛选 -> 过滤非适龄影片(仅标题命中年龄段白名单的保留)
+                    ArrayList<Movie.Video> filtered = new ArrayList<>();
+                    for (Movie.Video v : absXml.movie.videoList) {
+                        if (v != null && SourceViewModel.isTitleAllowedByAge(v.name)) {
+                            filtered.add(v);
+                        }
+                    }
                     if (page == 1) {
                         showSuccess();
                         isLoad = true;
-                        gridAdapter.setNewData(absXml.movie.videoList);
+                        gridAdapter.setNewData(filtered);
                     } else {
-                        gridAdapter.addData(absXml.movie.videoList);
+                        gridAdapter.addData(filtered);
                     }
                     page++;
                     maxPage = absXml.movie.pagecount;
-                    if (page > maxPage && maxPage!=0) {
+                    if (filtered.isEmpty()) {
+                        if (page == 1) showEmpty();
+                        gridAdapter.setEnableLoadMore(false);
+                    } else if (page > maxPage && maxPage!=0) {
                         gridAdapter.loadMoreEnd();
                         gridAdapter.setEnableLoadMore(false);
                     } else {

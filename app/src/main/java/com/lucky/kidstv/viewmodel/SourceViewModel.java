@@ -141,6 +141,20 @@ public class SourceViewModel extends ViewModel {
             default: return null;
         }
     }
+
+    // 儿童模式: 分类页适龄过滤 -> 影片标题是否通过当前年龄段白名单
+    // 启用适龄筛选时, 只有标题命中该年龄段白名单(或全量白名单)的影片才显示; 白名单为空则放行(避免误杀)
+    public static boolean isTitleAllowedByAge(String title) {
+        if (title == null || title.isEmpty()) return true;
+        String age = getAgeFilter();
+        if (age == null) return true; // 未启用适龄筛选 -> 全部放行
+        List<String> names = ApiConfig.get().getHomeVideosByAge(age);
+        if (names == null || names.isEmpty()) return true; // 无白名单配置 -> 放行
+        for (String name : names) {
+            if (name != null && !name.isEmpty() && title.contains(name)) return true;
+        }
+        return false;
+    }
     // homeContent
     public void getSort(final String sourceKey) {
         LOG.i("echo--getSort-start");
