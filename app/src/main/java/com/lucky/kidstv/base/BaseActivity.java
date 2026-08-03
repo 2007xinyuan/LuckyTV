@@ -6,13 +6,18 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +27,7 @@ import com.lucky.kidstv.R;
 import com.lucky.kidstv.callback.EmptyCallback;
 import com.lucky.kidstv.callback.LoadingCallback;
 import com.lucky.kidstv.ui.activity.DetailActivity;
+import com.lucky.kidstv.ui.activity.HomeActivity;
 import com.lucky.kidstv.util.AppManager;
 import com.lucky.kidstv.util.HawkConfig;
 import com.lucky.kidstv.util.LocaleHelper;
@@ -104,6 +110,50 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
         AppManager.getInstance().addActivity(this);
         init();
         setScreenOn();
+        addBackButton();
+    }
+
+    /**
+     * 二级以上页面统一添加返回按钮（首页除外）
+     */
+    protected void addBackButton() {
+        if (this instanceof HomeActivity) {
+            return;
+        }
+        try {
+            FrameLayout content = findViewById(android.R.id.content);
+            if (content == null || content.findViewWithTag("tv_back_button") != null) {
+                return;
+            }
+            TextView tvBack = new TextView(this);
+            tvBack.setTag("tv_back_button");
+            tvBack.setText(R.string.mn_back);
+            tvBack.setTextColor(Color.WHITE);
+            tvBack.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.ts_18));
+            tvBack.setGravity(Gravity.CENTER);
+            tvBack.setShadowLayer(6, 0, 0, Color.BLACK);
+            tvBack.setBackgroundResource(R.drawable.button_back_all);
+            tvBack.setFocusable(true);
+            tvBack.setClickable(true);
+            int padH = getResources().getDimensionPixelSize(R.dimen.vs_15);
+            int padV = getResources().getDimensionPixelSize(R.dimen.vs_5);
+            tvBack.setPadding(padH, padV, padH, padV);
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT);
+            int margin = getResources().getDimensionPixelSize(R.dimen.vs_20);
+            lp.gravity = Gravity.TOP | Gravity.START;
+            lp.setMargins(margin, margin, 0, 0);
+            content.addView(tvBack, lp);
+            tvBack.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
     }
 
     @Override

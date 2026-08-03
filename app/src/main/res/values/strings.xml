@@ -69,6 +69,7 @@
     <string name="mn_webview">WebView</string>
     <string name="mn_render">Render</string>
     <string name="mn_backup">Backup/Restore</string>
+    <string name="mn_back">← Back</string>
     <string name="mn_dns">DNS</string>
     <string name="mn_locale">Language</string>
     <string name="mn_theme">Theme</string>
