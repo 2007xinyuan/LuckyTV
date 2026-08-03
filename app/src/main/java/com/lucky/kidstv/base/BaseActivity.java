@@ -111,6 +111,35 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomAd
         init();
         setScreenOn();
         addBackButton();
+        addContrastOverlay();
+    }
+
+    /**
+     * 二级以上页面统一添加半透明深色遮罩（首页除外），
+     * 压暗浅色壁纸背景，保证前景文字/按钮对比度。
+     * 遮罩插入 content 最底层(index 0)，不遮挡任何控件与加载态。
+     */
+    protected void addContrastOverlay() {
+        if (this instanceof HomeActivity) {
+            return;
+        }
+        try {
+            FrameLayout content = findViewById(android.R.id.content);
+            if (content == null || content.findViewWithTag("tv_contrast_overlay") != null) {
+                return;
+            }
+            View overlay = new View(this);
+            overlay.setTag("tv_contrast_overlay");
+            overlay.setBackgroundColor(0x99000000);
+            overlay.setFocusable(false);
+            overlay.setClickable(false);
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT);
+            content.addView(overlay, 0, lp);
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
     }
 
     /**
