@@ -149,7 +149,7 @@ public class App extends MultiDexApplication {
         putDefault(HawkConfig.SHOW_PREVIEW, true);           //窗口预览: true=开启, false=关闭
         putDefault(HawkConfig.PLAY_SCALE, 0);                //画面缩放: 0=默认, 1=16:9, 2=4:3, 3=填充, 4=原始, 5=裁剪
         putDefault(HawkConfig.BACKGROUND_PLAY_TYPE, 0);      //后台：0=关闭, 1=开启, 2=画中画
-        putDefault(HawkConfig.PLAY_TYPE, 1);                 //播放器: 0=系统, 1=IJK, 2=Exo, 3=MX, 4=Reex, 5=Kodi
+        putDefault(HawkConfig.PLAY_TYPE, 2);                 //播放器: 0=系统, 1=IJK, 2=Exo, 3=MX, 4=Reex, 5=Kodi (x86_64模拟器无IJK native, 默认Exo)
         putDefault(HawkConfig.IJK_CODEC, "硬解码");           //IJK解码: 软解码, 硬解码
         // 系统选项
         putDefault(HawkConfig.HOME_LOCALE, 0);               //语言: 0=中文, 1=英文
@@ -173,6 +173,11 @@ public class App extends MultiDexApplication {
     }
 
     private void putDefault(String key, Object value) {
+        if (key.equals(HawkConfig.PLAY_TYPE)) {
+            // 儿童版强制 Exo 播放器: x86_64 构建无 IJK native 库, 旧缓存 PLAY_TYPE=1 会覆盖默认值导致详情页崩溃
+            Hawk.put(key, 2);
+            return;
+        }
         if (!Hawk.contains(key)) {
             Hawk.put(key, value);
         }

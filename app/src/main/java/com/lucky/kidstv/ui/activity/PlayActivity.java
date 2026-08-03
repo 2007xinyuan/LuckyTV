@@ -1085,7 +1085,7 @@ public class PlayActivity extends BaseActivity {
         }
         try {
             if (!mVodPlayerCfg.has("pl")) {
-                int playType = Hawk.get(HawkConfig.PLAY_TYPE, 1);
+                int playType = Hawk.get(HawkConfig.PLAY_TYPE, 2);
                 boolean configurationFile = HawkUtils.getVodPlayerPreferredConfigurationFile();
                 int playerType = sourceBean.getPlayerType();
                 if (configurationFile && playerType != -1) {
@@ -1128,7 +1128,7 @@ public class PlayActivity extends BaseActivity {
     void initPlayerDrive() {
         try {
             if (!mVodPlayerCfg.has("pl")) {
-                mVodPlayerCfg.put("pl", Hawk.get(HawkConfig.PLAY_TYPE, 1));
+                mVodPlayerCfg.put("pl", Hawk.get(HawkConfig.PLAY_TYPE, 2));
             }
             if (!mVodPlayerCfg.has("pr")) {
                 mVodPlayerCfg.put("pr", Hawk.get(HawkConfig.PLAY_RENDER, 0));

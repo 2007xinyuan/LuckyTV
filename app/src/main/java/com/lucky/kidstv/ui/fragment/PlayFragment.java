@@ -1071,21 +1071,9 @@ public class PlayFragment extends BaseLazyFragment {
             mVodPlayerCfg = new JSONObject();
         }
         try {
-            if (!mVodPlayerCfg.has("pl")) {
-                int playType = Hawk.get(HawkConfig.PLAY_TYPE, 1);
-                boolean configurationFile = HawkUtils.getVodPlayerPreferredConfigurationFile();
-                int playerType = sourceBean.getPlayerType();
-                if (configurationFile && playerType != -1) {
-                    playType = playerType;
-                }
-                mVodPlayerCfg.put("pl", playType);
-            } else {
-//                boolean configurationFile = HawkUtils.getVodPlayerPreferredConfigurationFile();
-//                if (!configurationFile) {
-//                    int playType = Hawk.get(HawkConfig.PLAY_TYPE, 0);
-//                    mVodPlayerCfg.put("pl", playType);
-//                }
-            }
+            // 儿童版强制 Exo(2): 数据源 playerCfg 可能自带 pl=1(IJK), x86_64 无 IJK native 会 UnsatisfiedLinkError 崩溃
+            // 因此无条件覆盖, 不能依赖 !has("pl") 判断
+            mVodPlayerCfg.put("pl", 2);
             if (!mVodPlayerCfg.has("pr")) {
                 mVodPlayerCfg.put("pr", Hawk.get(HawkConfig.PLAY_RENDER, 0));
             }
@@ -1256,7 +1244,8 @@ public class PlayFragment extends BaseLazyFragment {
 
     void switchPlayer() {
         try {
-            int playerType = mVodPlayerCfg.getInt("pl") == 1 ? 2 : 1;
+            // 儿童版不允许切到 IJK(1): x86_64 无 IJK native, 只在 2(Exo) 与 0(系统) 之间轮换
+            int playerType = mVodPlayerCfg.getInt("pl") == 2 ? 0 : 2;
             mVodPlayerCfg.put("pl", playerType);
             mController.setPlayerConfig(mVodPlayerCfg);
             mVodInfo.playerCfg = mVodPlayerCfg.toString();
@@ -1968,11 +1957,22 @@ public class PlayFragment extends BaseLazyFragment {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            String url = request.getUrl().toString();
+            // 儿童模式: 拦截广告/博彩域名跳转
+            if (AdBlocker.isAd(url) || VideoParseRuler.isFilter(webUrl, url)) {
+                LOG.i("echo-blocked ad jump url:" + url);
+                return true;
+            }
             return false;
         }
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            // 儿童模式: 拦截广告/博彩域名跳转
+            if (AdBlocker.isAd(url) || VideoParseRuler.isFilter(webUrl, url)) {
+                LOG.i("echo-blocked ad jump url:" + url);
+                return true;
+            }
             return false;
         }
 
@@ -1987,8 +1987,34 @@ public class PlayFragment extends BaseLazyFragment {
             LOG.i("echo-onPageFinished url:" + url);
             if(!url.equals("about:blank")){
                 mController.evaluateScript(sourceBean,url,view,null);
+                // 儿童模式: 注入 JS 清除博彩/广告元素
+                removeAdElements(view);
             }
             mHandler.sendEmptyMessage(200);
+        }
+
+        // 儿童模式: 清除嗅探页中的博彩广告/悬浮广告元素
+        private void removeAdElements(WebView view) {
+            try {
+                String js = "javascript:(function(){" +
+                        "var kws=['新葡京','澳门','博彩','897897','bet365','hg0088','casino','okzybo','vip.','金沙','皇冠','开户','投注','百家乐'];"
+                        + "var els=document.querySelectorAll('div,iframe,a,img,span,p');"
+                        + "for(var i=0;i<els.length;i++){var e=els[i];"
+                        + "var t=(e.innerText||'')+(e.id||'')+(e.className||'')+(e.src||'');"
+                        + "for(var j=0;j<kws.length;j++){if(t.indexOf(kws[j])>=0){"
+                        + "if(e.tagName==='A'||e.tagName==='IFRAME'){e.parentNode&&e.parentNode.removeChild(e);}else{e.style.display='none';}"
+                        + "break;}}}"
+                        + "var g=document.getElementById('gaog');if(g){g.style.display='none';}"
+                        + "var a1=document.getElementById('a1');if(a1){a1.style.position='absolute';a1.style.zIndex='999';a1.style.left='0';a1.style.top='0';}"
+                        + "})();";
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    view.evaluateJavascript(js, null);
+                } else {
+                    view.loadUrl(js);
+                }
+            } catch (Exception e) {
+                LOG.e("removeAdElements error:" + e.getMessage());
+            }
         }
 
         WebResourceResponse checkIsVideo(String url, HashMap<String, String> headers) {
@@ -2156,6 +2182,23 @@ public class PlayFragment extends BaseLazyFragment {
             LOG.i("echo-onLoadFinished url:" + url);
             if(!url.equals("about:blank")){
                 mController.evaluateScript(sourceBean,url,null,view);
+                // 儿童模式: 注入 JS 清除博彩/广告元素
+                try {
+                    String js = "javascript:(function(){" +
+                            "var kws=['新葡京','澳门','博彩','897897','bet365','hg0088','casino','okzybo','vip.','金沙','皇冠','开户','投注','百家乐'];"
+                            + "var els=document.querySelectorAll('div,iframe,a,img,span,p');"
+                            + "for(var i=0;i<els.length;i++){var e=els[i];"
+                            + "var t=(e.innerText||'')+(e.id||'')+(e.className||'')+(e.src||'');"
+                            + "for(var j=0;j<kws.length;j++){if(t.indexOf(kws[j])>=0){"
+                            + "if(e.tagName==='A'||e.tagName==='IFRAME'){e.parentNode&&e.parentNode.removeChild(e);}else{e.style.display='none';}"
+                            + "break;}}}"
+                            + "var g=document.getElementById('gaog');if(g){g.style.display='none';}"
+                            + "var a1=document.getElementById('a1');if(a1){a1.style.position='absolute';a1.style.zIndex='999';a1.style.left='0';a1.style.top='0';}"
+                            + "})();";
+                    view.evaluateJavascript(js, null);
+                } catch (Exception e) {
+                    LOG.e("removeAdElements xwalk error:" + e.getMessage());
+                }
             }
         }
 
@@ -2225,6 +2268,11 @@ public class PlayFragment extends BaseLazyFragment {
 
         @Override
         public boolean shouldOverrideUrlLoading(XWalkView view, String s) {
+            // 儿童模式: 拦截广告/博彩域名跳转
+            if (AdBlocker.isAd(s) || VideoParseRuler.isFilter(webUrl, s)) {
+                LOG.i("echo-blocked xwalk ad jump url:" + s);
+                return true;
+            }
             return false;
         }
 

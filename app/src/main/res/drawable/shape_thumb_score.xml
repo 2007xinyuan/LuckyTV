@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 评分角标：橙红色醒目背景 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#E64A19" />
+    <corners android:radius="@dimen/vs_5" />
+</shape>

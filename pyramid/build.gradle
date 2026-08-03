@@ -11,12 +11,13 @@ android {
         targetSdkVersion 28
 
         python {
-            // CI (Linux) 用系统 Python，本地 Windows 用指定路径
+            // CI (Linux) 用系统 Python，本地 Windows 用 PATH 上的 python
             if (System.getProperty('os.name').toLowerCase().contains('linux')) {
                 // CI 用 setup-python 安装的版本（在PATH上）
                 buildPython("python3")
             } else {
-                buildPython("D:/Programs/Python/Python38/python.exe")
+                // 通用：使用 PATH 上的 python；本机如需指定绝对路径可在此覆盖
+                buildPython("python")
             }
             pip {
                 install "lxml"

@@ -42,6 +42,8 @@ public class PlayerHelper {
             e.printStackTrace();
         }
         if (forcePlayerType >= 0) playerType = forcePlayerType;
+        // 儿童版硬禁 IJK(1): x86_64 构建无 IJK native 库, 任何路径都不允许实例化 IjkMediaPlayer
+        if (playerType == 1) playerType = 2;
         IJKCode codec = ApiConfig.get().getIJKCodec(ijkCode);
         PlayerFactory playerFactory;
         if (playerType == 1) {
@@ -85,6 +87,8 @@ public class PlayerHelper {
 
     public static void updateCfg(VideoView videoView) {
         int playType = Hawk.get(HawkConfig.PLAY_TYPE, 0);
+        // 儿童版硬禁 IJK(1): x86_64 构建无 IJK native 库
+        if (playType == 1) playType = 2;
         PlayerFactory playerFactory;
         if (playType == 1) {
             playerFactory = new PlayerFactory<IjkmPlayer>() {
