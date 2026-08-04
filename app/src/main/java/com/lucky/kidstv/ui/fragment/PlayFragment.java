@@ -67,6 +67,7 @@ import com.lucky.kidstv.player.thirdparty.ReexPlayer;
 import com.lucky.kidstv.server.ControlManager;
 import com.lucky.kidstv.server.RemoteServer;
 import com.lucky.kidstv.subtitle.model.Subtitle;
+import com.lucky.kidstv.ui.activity.BreakActivity;
 import com.lucky.kidstv.ui.activity.DetailActivity;
 import com.lucky.kidstv.ui.adapter.SelectDialogAdapter;
 import com.lucky.kidstv.ui.dialog.DanmuSettingDialog;
@@ -154,6 +155,11 @@ public class PlayFragment extends BaseLazyFragment {
     private long videoDuration = -1;
     private List<String> videoSegmentationURL = new ArrayList<>();
 
+    // ===== 护眼限时 + 广告段跳过（内嵌预览与全屏播放共用）=====
+    private static final int MSG_PLAY_TICK = 400;
+    private boolean breakLaunched = false; // 防止重复启动休息页
+    private long adMarkStartMs = -1;
+
     @Override
     protected int getLayoutResID() {
         return R.layout.activity_play;
@@ -230,6 +236,9 @@ public class PlayFragment extends BaseLazyFragment {
                     }
                 } else if (msg.what == 300) {
                     setTip((String)msg.obj, false, true);
+                } else if (msg.what == MSG_PLAY_TICK) {
+                    onPlayTick();
+                    mHandler.sendEmptyMessageDelayed(MSG_PLAY_TICK, 1000);
                 }
                 return false;
             }
@@ -858,6 +867,7 @@ public class PlayFragment extends BaseLazyFragment {
                             mVideoView.setUrl(url);
                         }
                         mVideoView.start();
+                        startPlayTick();
                         mController.resetSpeed();
                     }
                 }
@@ -1104,9 +1114,125 @@ public class PlayFragment extends BaseLazyFragment {
 
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event != null) {
+            // 广告段标记: INFO 键 = 标记起点/终点；MENU 键 = 清除本视频广告标记
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                if (event.getKeyCode() == KeyEvent.KEYCODE_INFO) {
+                    toggleAdMark();
+                    return true;
+                }
+                if (event.getKeyCode() == KeyEvent.KEYCODE_MENU &&
+                        event.getRepeatCount() == 0 && Hawk.get(HawkConfig.AD_SKIP_ENABLE, false)) {
+                    clearAdMarks();
+                    return true;
+                }
+            }
             return mController.onKeyEvent(event);
         }
         return false;
+    }
+
+    // ===== 护眼限时 + 广告段跳过（内嵌预览同样生效）=====
+
+    private void startPlayTick() {
+        if (mHandler != null && !mHandler.hasMessages(MSG_PLAY_TICK)) {
+            mHandler.sendEmptyMessageDelayed(MSG_PLAY_TICK, 1000);
+        }
+    }
+
+    // 每秒 tick：累计播放时长（跨视频），并检测广告段自动跳过
+    private void onPlayTick() {
+        if (mVideoView == null) return;
+        // 护眼限时累计（仅正在播放时）
+        if (Hawk.get(HawkConfig.PLAY_LIMIT_ENABLE, false) && mVideoView.isPlaying()) {
+            int limitMin = Hawk.get(HawkConfig.PLAY_LIMIT_MINUTES, 30);
+            if (limitMin > 0) {
+                int accum = Hawk.get(HawkConfig.PLAY_ACCUM_SECONDS, 0);
+                accum++;
+                Hawk.put(HawkConfig.PLAY_ACCUM_SECONDS, accum);
+                if (!breakLaunched && accum >= limitMin * 60) {
+                    breakLaunched = true;
+                    mVideoView.pause();
+                    Toast.makeText(mActivity, "连续播放已满 " + limitMin + " 分钟，休息一下吧", Toast.LENGTH_LONG).show();
+                    mActivity.startActivity(new Intent(mActivity, BreakActivity.class));
+                    return;
+                }
+            }
+        }
+        // 广告段自动跳过
+        if (Hawk.get(HawkConfig.AD_SKIP_ENABLE, false) && mVideoView.isPlaying() && videoURL != null) {
+            long pos = mVideoView.getCurrentPosition();
+            if (pos > 0) {
+                long[] seg = getAdSegment(videoURL, pos);
+                if (seg != null) {
+                    mVideoView.seekTo(seg[1]);
+                    setTip("已跳过广告片段", true, false);
+                }
+            }
+        }
+    }
+
+    // 广告段标记：第一次按=起点，第二次按=终点并保存
+    private void toggleAdMark() {
+        if (videoURL == null) {
+            Toast.makeText(mActivity, "视频尚未开始，无法标记", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        long pos = mVideoView.getCurrentPosition();
+        if (adMarkStartMs < 0) {
+            adMarkStartMs = pos;
+            Toast.makeText(mActivity, "已标记广告起点(" + (pos / 1000) + "s)，播到广告结束再按一次", Toast.LENGTH_LONG).show();
+        } else {
+            long start = adMarkStartMs;
+            long end = pos;
+            adMarkStartMs = -1;
+            if (end <= start + 1000) {
+                Toast.makeText(mActivity, "广告段太短，未保存", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            saveAdSegment(videoURL, start, end);
+            Toast.makeText(mActivity, "广告段已保存(从" + (start / 1000) + "s到" + (end / 1000) + "s)，下次播放自动跳过", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    // 保存广告段: key = ad_segments_<md5(url)>, value = "start,end;start2,end2" (毫秒)
+    private void saveAdSegment(String url, long start, long end) {
+        String key = HawkConfig.AD_SEGMENTS_PREFIX + MD5.string2MD5(url);
+        String old = Hawk.get(key, "");
+        if (old.contains(start + ",")) return;
+        String seg = start + "," + end;
+        String merged = old.isEmpty() ? seg : (old + ";" + seg);
+        Hawk.put(key, merged);
+    }
+
+    // 查询位置是否落在广告段内，返回该段 [start,end] 否则 null
+    private long[] getAdSegment(String url, long pos) {
+        String key = HawkConfig.AD_SEGMENTS_PREFIX + MD5.string2MD5(url);
+        String data = Hawk.get(key, "");
+        if (data.isEmpty()) return null;
+        String[] pairs = data.split(";");
+        for (String pair : pairs) {
+            String[] se = pair.split(",");
+            if (se.length == 2) {
+                try {
+                    long start = Long.parseLong(se[0].trim());
+                    long end = Long.parseLong(se[1].trim());
+                    if (pos >= start - 500 && pos <= end + 500) {
+                        return new long[]{start, end};
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+        return null;
+    }
+
+    // 清除当前视频的广告标记（菜单键）
+    private void clearAdMarks() {
+        if (videoURL == null) return;
+        String key = HawkConfig.AD_SEGMENTS_PREFIX + MD5.string2MD5(videoURL);
+        Hawk.delete(key);
+        adMarkStartMs = -1;
+        Toast.makeText(mActivity, "已清除本视频广告标记", Toast.LENGTH_SHORT).show();
     }
 
     // takagen99 : Picture-in-Picture support
@@ -1128,6 +1254,7 @@ public class PlayFragment extends BaseLazyFragment {
             getVodController().mProgressTop.setAlpha(1);
             mVideoView.resume();
         }
+        breakLaunched = false; // 休息页答对返回后允许下次再触发
     }
 
     @Override
@@ -1154,6 +1281,9 @@ public class PlayFragment extends BaseLazyFragment {
         //手动注销
         sourceViewModel.playResult.removeObserver(mObserverPlayResult);
         EventBus.getDefault().unregister(this);
+        if (mHandler != null) {
+            mHandler.removeMessages(MSG_PLAY_TICK);
+        }
         if (mVideoView != null) {
             mVideoView.release();
             mVideoView = null;

@@ -72,6 +72,11 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private TextView tvHomeRec;
     private TextView tvHomeNum;
     private TextView tvAgeFilter;
+    // 儿童护眼限时 + 广告跳过
+    private TextView tvPlayLimit;
+    private TextView tvPlayLimitMin;
+    private TextView tvBreakMin;
+    private TextView tvAdSkip;
 
     // Player Section
     private TextView tvShowPreviewText;
@@ -120,6 +125,14 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvHomeNum.setText(HistoryHelper.getHomeRecName(Hawk.get(HawkConfig.HOME_NUM, 0)));
         tvAgeFilter = findViewById(R.id.tvAgeFilter);
         tvAgeFilter.setText(getAgeFilterName(Hawk.get(HawkConfig.AGE_FILTER, 0)));
+        tvPlayLimit = findViewById(R.id.tvPlayLimit);
+        tvPlayLimit.setText(Hawk.get(HawkConfig.PLAY_LIMIT_ENABLE, false) ? "已开启" : "已关闭");
+        tvPlayLimitMin = findViewById(R.id.tvPlayLimitMin);
+        tvPlayLimitMin.setText(Hawk.get(HawkConfig.PLAY_LIMIT_MINUTES, 30) + " 分钟");
+        tvBreakMin = findViewById(R.id.tvBreakMin);
+        tvBreakMin.setText(Hawk.get(HawkConfig.BREAK_MINUTES, 5) + " 分钟");
+        tvAdSkip = findViewById(R.id.tvAdSkip);
+        tvAdSkip.setText(Hawk.get(HawkConfig.AD_SKIP_ENABLE, false) ? "已开启" : "已关闭");
         // Player Section
         tvShowPreviewText = findViewById(R.id.showPreviewText);
         tvShowPreviewText.setText(Hawk.get(HawkConfig.SHOW_PREVIEW, true) ? "开启" : "关闭");
@@ -390,6 +403,102 @@ public class ModelSettingFragment extends BaseLazyFragment {
                     }
                 }, types, defaultPos);
                 dialog.show();
+            }
+        });
+        // 儿童护眼: 连续播放限时 + 休息 ----------------------------------------------
+        // 开关: 是否启用连续播放限时
+        findViewById(R.id.llPlayLimit).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                boolean cur = Hawk.get(HawkConfig.PLAY_LIMIT_ENABLE, false);
+                Hawk.put(HawkConfig.PLAY_LIMIT_ENABLE, !cur);
+                if (!cur) Hawk.put(HawkConfig.PLAY_ACCUM_SECONDS, 0); // 开启时重置累计
+                tvPlayLimit.setText(!cur ? "已开启" : "已关闭");
+            }
+        });
+        // 连续播放时长(分钟)
+        findViewById(R.id.llPlayLimitMin).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                int defaultPos = Hawk.get(HawkConfig.PLAY_LIMIT_MINUTES, 30);
+                ArrayList<Integer> mins = new ArrayList<>();
+                for (int m : new int[]{10, 15, 20, 30, 45, 60}) mins.add(m);
+                int defIdx = mins.indexOf(defaultPos);
+                if (defIdx < 0) defIdx = 3;
+                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
+                dialog.setTip("连续播放时长");
+                dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                    @Override
+                    public void click(Integer value, int pos) {
+                        Hawk.put(HawkConfig.PLAY_LIMIT_MINUTES, value);
+                        tvPlayLimitMin.setText(value + " 分钟");
+                    }
+
+                    @Override
+                    public String getDisplay(Integer val) {
+                        return val + " 分钟";
+                    }
+                }, new DiffUtil.ItemCallback<Integer>() {
+                    @Override
+                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+                }, mins, defIdx);
+                dialog.show();
+            }
+        });
+        // 休息时长(分钟)
+        findViewById(R.id.llBreakMin).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                int defaultPos = Hawk.get(HawkConfig.BREAK_MINUTES, 5);
+                ArrayList<Integer> mins = new ArrayList<>();
+                for (int m : new int[]{1, 3, 5, 10, 15}) mins.add(m);
+                int defIdx = mins.indexOf(defaultPos);
+                if (defIdx < 0) defIdx = 2;
+                SelectDialog<Integer> dialog = new SelectDialog<>(mActivity);
+                dialog.setTip("休息时长");
+                dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<Integer>() {
+                    @Override
+                    public void click(Integer value, int pos) {
+                        Hawk.put(HawkConfig.BREAK_MINUTES, value);
+                        tvBreakMin.setText(value + " 分钟");
+                    }
+
+                    @Override
+                    public String getDisplay(Integer val) {
+                        return val + " 分钟";
+                    }
+                }, new DiffUtil.ItemCallback<Integer>() {
+                    @Override
+                    public boolean areItemsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(@NonNull @NotNull Integer oldItem, @NonNull @NotNull Integer newItem) {
+                        return oldItem.intValue() == newItem.intValue();
+                    }
+                }, mins, defIdx);
+                dialog.show();
+            }
+        });
+        // 广告段自动跳过开关
+        findViewById(R.id.llAdSkip).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FastClickCheckUtil.check(v);
+                boolean cur = Hawk.get(HawkConfig.AD_SKIP_ENABLE, false);
+                Hawk.put(HawkConfig.AD_SKIP_ENABLE, !cur);
+                tvAdSkip.setText(!cur ? "已开启" : "已关闭");
             }
         });
         // 2. PLAYER Configuration -------------------------------------------------------------- //

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 护眼休息页：全屏倒计时 + 退出需做 100 以内加减法（填空题，遥控器数字键输入） -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF000000"
+    android:keepScreenOn="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingLeft="80dp"
+        android:paddingRight="80dp">
+
+        <TextView
+            android:id="@+id/tvBreakTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="眼睛休息一下"
+            android:textColor="#FFFFFFFF"
+            android:textSize="44sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvCountdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="05:00"
+            android:textColor="#FF4FC3F7"
+            android:textSize="96sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvBreakHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="休息结束后答对一道数学题即可继续观看"
+            android:textColor="#FFB0BEC5"
+            android:textSize="24sp" />
+
+        <!-- 数学题区域（倒计时结束后显示）：填空题 -->
+        <LinearLayout
+            android:id="@+id/llQuiz"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvQuizQuestion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="23 + 45 = ?"
+                android:textColor="#FFFFFFFF"
+                android:textSize="52sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvQuizInput"
+                android:layout_width="260dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/shape_quiz_option"
+                android:gravity="center"
+                android:text=""
+                android:textColor="#FFFFFFFF"
+                android:textSize="40sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvQuizTip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="14dp"
+                android:text="请用遥控器数字键输入答案，按 OK 确认；按返回删除一位"
+                android:textColor="#FFFFB74D"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/tvQuizResult"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:text=""
+                android:textColor="#FFFF5252"
+                android:textSize="24sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvSkipHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="40dp"
+        android:text="按返回键可提前结束休息（需答题）"
+        android:textColor="#FF78909C"
+        android:textSize="20sp" />
+</RelativeLayout>

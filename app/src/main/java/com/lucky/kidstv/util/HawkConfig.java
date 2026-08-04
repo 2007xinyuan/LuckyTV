@@ -74,6 +74,18 @@ public class HawkConfig {
     public static final String LIVE_SKIP_PASSWORD = "live_skip_password";
     public static final String LIVE_PLAYER_TYPE = "live_player_type"; // 0 系统 1 ijk 2 exo
 
+    // 儿童护眼: 连续播放限时休息
+    public static final String PLAY_LIMIT_ENABLE = "play_limit_enable";   // 是否开启连续播放限时
+    public static final String PLAY_LIMIT_MINUTES = "play_limit_minutes"; // 连续播放 N 分钟后休息（默认30）
+    public static final String BREAK_MINUTES = "break_minutes";           // 休息 N 分钟（默认5）
+    public static final String PLAY_ACCUM_SECONDS = "play_accum_seconds"; // 已累计播放秒数（跨视频累计）
+
+    // 广告视频识别跳过（新葡京等广告是硬剪辑进正片视频流的，需手动标记广告段后自动跳过）
+    public static final String AD_SKIP_ENABLE = "ad_skip_enable";   // 是否开启广告段自动跳过
+    public static final String AD_SEGMENTS_PREFIX = "ad_segments_"; // 视频广告段表: ad_segments_<md5(url)> = "start1,end1;start2,end2"（毫秒）
+    public static final String AD_MARK_START_HINT = "已标记广告起点，播到广告结束再按一次";
+    public static final String AD_MARK_END_HINT = "已标记广告段并保存，下次播放将自动跳过";
+
     public static boolean isDebug() {
         return Hawk.get(DEBUG_OPEN, false);
     }

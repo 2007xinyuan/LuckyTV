@@ -21,6 +21,13 @@
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
+    <!-- 护眼休息页独立主题：不依赖 AppCompat，避免原生 TextView 解析 textColorPrimary 崩溃 -->
+    <style name="BreakTheme" parent="@android:style/Theme.Black.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:colorBackground">@android:color/black</item>
+    </style>
+
     <!-- Alternative Themes -->
     <style name="NetfxTheme" parent="AppTheme.NoActionBar">
         <item name="color_theme">#FF8C00</item>

@@ -50,7 +50,6 @@ import com.lucky.kidstv.server.ControlManager;
 import com.lucky.kidstv.ui.adapter.HomePageAdapter;
 import com.lucky.kidstv.ui.adapter.SelectDialogAdapter;
 import com.lucky.kidstv.ui.adapter.SortAdapter;
-import com.lucky.kidstv.ui.dialog.ExitPasswordDialog;
 import com.lucky.kidstv.ui.dialog.SelectDialog;
 import com.lucky.kidstv.ui.dialog.TipDialog;
 import com.lucky.kidstv.ui.fragment.GridFragment;
@@ -679,22 +678,13 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void doExit() {
-        ExitPasswordDialog dialog = new ExitPasswordDialog(HomeActivity.this, new ExitPasswordDialog.OnPasswordListener() {
-            @Override
-            public void onCorrect() {
-                AppManager.getInstance().finishAllActivity();
-                EventBus.getDefault().unregister(HomeActivity.this);
-                ControlManager.get().stopServer();
-                finish();
-                android.os.Process.killProcess(android.os.Process.myPid());
-                System.exit(0);
-            }
-
-            @Override
-            public void onCancel() {
-            }
-        });
-        dialog.show();
+        // 儿童版：直接退出，无需密码（原 ExitPasswordDialog 已移除）
+        AppManager.getInstance().finishAllActivity();
+        EventBus.getDefault().unregister(HomeActivity.this);
+        ControlManager.get().stopServer();
+        finish();
+        android.os.Process.killProcess(android.os.Process.myPid());
+        System.exit(0);
     }
 
     @Override

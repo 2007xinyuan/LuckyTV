@@ -117,6 +117,8 @@ public class SourceViewModel extends ViewModel {
     }
 
     public static final ExecutorService spThreadPool = Executors.newSingleThreadExecutor();
+    // 独立解析线程池：避免与 spThreadPool(单线程, type3 的 future.get 会占用 20s) 排队互卡
+    private static final ExecutorService parseThreadPool = Executors.newFixedThreadPool(2);
 
     //homeContent缓存，最多存储5个sourceKey的AbsSortXml对象
     private static final Map<String, AbsSortXml> sortCache = new LinkedHashMap<String, AbsSortXml>(5, 0.75f, true) {
@@ -252,33 +254,40 @@ public class SourceViewModel extends ViewModel {
 
                         @Override
                         public void onSuccess(Response<String> response) {
-                            AbsSortXml sortXml = null;
-                            if (type == 0) {
-                                String xml = response.body();
-                                sortXml = sortXml(sortResult, xml);
-                            } else if (type == 1) {
-                                String json = response.body();
-                                sortXml = sortJson(sortResult, json);
-                            }
-                            LOG.i("echo-getSort-onSuccess: sortXml=" + (sortXml == null ? "NULL" : ("classes=" + (sortXml.classes == null || sortXml.classes.sortList == null ? 0 : sortXml.classes.sortList.size()) + " list=" + (sortXml.list == null ? "null" : (sortXml.list.videoList == null ? "vlist-null" : sortXml.list.videoList.size())))));
-                            if (sortXml != null && Hawk.get(HawkConfig.HOME_REC, 0) == 1 && sortXml.list != null && sortXml.list.videoList != null && sortXml.list.videoList.size() > 0) {
-                                ArrayList<String> ids = new ArrayList<>();
-                                for (Movie.Video vod : sortXml.list.videoList) {
-                                    ids.add(vod.id);
-                                }
-                                final AbsSortXml finalSortXml = sortXml;
-                                getHomeRecList(sourceBean, ids, new HomeRecCallback() {
-                                    @Override
-                                    public void done(List<Movie.Video> videos) {
-                                        finalSortXml.videoList = videos;
-                                        // 儿童模式: 首页推荐 = 白名单动画(安全警长啦咘啦哆/布鲁伊/汪汪队等) + 收藏影片, 过滤B站解说/自制
-                                        injectHomeVideos(sourceBean, finalSortXml, sourceKey);
+                            // 解析移到后台线程
+                            final String body = response.body();
+                            parseThreadPool.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    AbsSortXml sortXml = null;
+                                    if (type == 0) {
+                                        String xml = body;
+                                        sortXml = sortXml(sortResult, xml);
+                                    } else if (type == 1) {
+                                        String json = body;
+                                        sortXml = sortJson(sortResult, json);
                                     }
-                                });
-                            } else {
-                                sortResult.postValue(sortXml);
-                                sortCache.put(sourceKey, sortXml);
-                            }
+                                    LOG.i("echo-getSort-onSuccess: sortXml=" + (sortXml == null ? "NULL" : ("classes=" + (sortXml.classes == null || sortXml.classes.sortList == null ? 0 : sortXml.classes.sortList.size()) + " list=" + (sortXml.list == null ? "null" : (sortXml.list.videoList == null ? "vlist-null" : sortXml.list.videoList.size())))));
+                                    if (sortXml != null && Hawk.get(HawkConfig.HOME_REC, 0) == 1 && sortXml.list != null && sortXml.list.videoList != null && sortXml.list.videoList.size() > 0) {
+                                        ArrayList<String> ids = new ArrayList<>();
+                                        for (Movie.Video vod : sortXml.list.videoList) {
+                                            ids.add(vod.id);
+                                        }
+                                        final AbsSortXml finalSortXml = sortXml;
+                                        getHomeRecList(sourceBean, ids, new HomeRecCallback() {
+                                            @Override
+                                            public void done(List<Movie.Video> videos) {
+                                                finalSortXml.videoList = videos;
+                                                // 儿童模式: 首页推荐 = 白名单动画(安全警长啦咘啦哆/布鲁伊/汪汪队等) + 收藏影片, 过滤B站解说/自制
+                                                injectHomeVideos(sourceBean, finalSortXml, sourceKey);
+                                            }
+                                        });
+                                    } else {
+                                        sortResult.postValue(sortXml);
+                                        sortCache.put(sourceKey, sortXml);
+                                    }
+                                }
+                            });
                         }
 
                         @Override
@@ -385,13 +394,18 @@ public class SourceViewModel extends ViewModel {
 
                         @Override
                         public void onSuccess(Response<String> response) {
-                            if (type == 0) {
-                                String xml = response.body();
-                                xml(listResult, xml, homeSourceBean.getKey());
-                            } else {
-                                String json = response.body();
-                                json(listResult, json, homeSourceBean.getKey());
-                            }
+                            // 解析移到后台线程，避免大 JSON/XML 解析卡主线程（老机型首页慢的主因之一）
+                            final String body = response.body();
+                            parseThreadPool.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (type == 0) {
+                                        xml(listResult, body, homeSourceBean.getKey());
+                                    } else {
+                                        json(listResult, body, homeSourceBean.getKey());
+                                    }
+                                }
+                            });
                         }
 
                         @Override
@@ -430,9 +444,15 @@ public class SourceViewModel extends ViewModel {
 
                         @Override
                         public void onSuccess(Response<String> response) {
-                            String json = response.body();
-                            LOG.i(json);
-                            json(listResult, json, homeSourceBean.getKey());
+                            final String jsonStr = response.body();
+                            LOG.i(jsonStr);
+                            // 解析移到后台线程
+                            parseThreadPool.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    json(listResult, jsonStr, homeSourceBean.getKey());
+                                }
+                            });
                         }
 
                         @Override

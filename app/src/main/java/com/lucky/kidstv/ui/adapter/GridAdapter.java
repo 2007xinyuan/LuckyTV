@@ -40,6 +40,9 @@ public class GridAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder> {
 
     @Override
     protected void convert(BaseViewHolder helper, Movie.Video item) {
+        // 缩略图 override 尺寸：214x280dp 显示尺寸的 ~1.5x，避免 Glide 全尺寸解码大图拖慢老机型
+        final int THUMB_W = 320;
+        final int THUMB_H = 428;
         if (this.mShowList) {
             helper.setText(R.id.tvNote, item.note);
             helper.setText(R.id.tvName, item.name);
@@ -47,7 +50,7 @@ public class GridAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder> {
             //由于部分电视机使用glide报错
             if (!TextUtils.isEmpty(item.pic)) {
             	item.pic=item.pic.trim();
-                ImgUtil.load(item.pic, ivThumb, 14);
+                ImgUtil.load(item.pic, ivThumb, 14, THUMB_W, THUMB_H);
             } else {
                 ivThumb.setImageResource(R.drawable.img_loading_placeholder);
             }
@@ -101,7 +104,7 @@ public class GridAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder> {
         }
         //由于部分电视机使用glide报错
         if (!TextUtils.isEmpty(item.pic)) {
-            ImgUtil.load(item.pic, ivThumb, 14);
+            ImgUtil.load(item.pic, ivThumb, 14, THUMB_W, THUMB_H);
         } else {
             
             ivThumb.setImageResource(R.drawable.img_loading_placeholder);

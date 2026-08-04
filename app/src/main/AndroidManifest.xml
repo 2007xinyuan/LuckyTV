@@ -70,6 +70,12 @@
             android:supportsPictureInPicture="true"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation" />
         <activity
+            android:name=".ui.activity.BreakActivity"
+            android:theme="@style/BreakTheme"
+            android:screenOrientation="sensorLandscape"
+            android:excludeFromRecents="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation" />
+        <activity
             android:name=".ui.activity.DetailActivity"
             android:screenOrientation="sensorLandscape"
             android:supportsPictureInPicture="true"
