@@ -1204,8 +1204,31 @@ public class PlayFragment extends BaseLazyFragment {
         Hawk.put(key, merged);
     }
 
+    // 内置广告位置规则: {URL域名特征, 广告开始ms, 广告结束ms}
+    // 量子源(lz-cdn系列) 2026-08-04 实测8集(安全警长4集/超级飞侠2集/熊出没2集):
+    //   广告固定在 ~296-300s(第5分钟) 开始, ~322-323s 结束, 同一段赌博口播录音
+    private static final String[][] BUILTIN_AD_RULES = {
+            {"lz-cdn", "296000", "323000"},
+            {"cdnlz", "296000", "323000"},
+    };
+
     // 查询位置是否落在广告段内，返回该段 [start,end] 否则 null
     private long[] getAdSegment(String url, long pos) {
+        // 1. 内置规则（按源域名特征匹配，装好即生效）
+        if (url != null) {
+            String lower = url.toLowerCase();
+            for (String[] rule : BUILTIN_AD_RULES) {
+                if (lower.contains(rule[0])) {
+                    long start = Long.parseLong(rule[1]);
+                    long end = Long.parseLong(rule[2]);
+                    if (pos >= start - 500 && pos <= end + 500) {
+                        return new long[]{start, end};
+                    }
+                }
+            }
+        }
+        // 2. 用户手动标记（INFO键）
+        if (url == null) return null;
         String key = HawkConfig.AD_SEGMENTS_PREFIX + MD5.string2MD5(url);
         String data = Hawk.get(key, "");
         if (data.isEmpty()) return null;

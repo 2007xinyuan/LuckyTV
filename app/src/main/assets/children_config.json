@@ -46,8 +46,22 @@
  ],
  "sites": [
   {
+   "key": "非凡动画",
+   "name": "主源|非凡",
+   "type": 1,
+   "api": "https://api.ffzyapi.com/api.php/provide/vod/?ac=list",
+   "searchable": 1,
+   "quickSearch": 1,
+   "filterable": 1,
+   "categories": [
+    "动漫片",
+    "国产动漫",
+    "欧美动漫"
+   ]
+  },
+  {
    "key": "量子动画",
-   "name": "主源|量子",
+   "name": "备用|量子",
    "type": 1,
    "api": "https://cj.lziapi.com/api.php/provide/vod/?ac=list",
    "homeTid": "30",
@@ -57,20 +71,6 @@
    "categories": [
     "国产动漫",
     "日韩动漫",
-    "欧美动漫"
-   ]
-  },
-  {
-   "key": "非凡动画",
-   "name": "备用|非凡",
-   "type": 1,
-   "api": "https://api.ffzyapi.com/api.php/provide/vod/?ac=list",
-   "searchable": 1,
-   "quickSearch": 1,
-   "filterable": 1,
-   "categories": [
-    "动漫片",
-    "国产动漫",
     "欧美动漫"
    ]
   },
