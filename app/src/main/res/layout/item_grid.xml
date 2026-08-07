@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/shape_thumb_radius"
     android:focusable="true"
+    android:clickable="true"
     android:padding="@dimen/vs_1">
 
     <FrameLayout

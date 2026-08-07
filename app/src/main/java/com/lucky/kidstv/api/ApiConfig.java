@@ -382,6 +382,29 @@ public class ApiConfig {
                 if (!names.isEmpty()) ageGroups.put(entry.getKey(), names);
             }
         }
+        // ===== 热更新字段（七牛 app.json，改配置无需重装 APK）=====
+        // 护眼参数：云端下发覆盖本地 Hawk
+        System.out.println("HOTUPDATE: hasEyeCare=" + infoJson.has("eyeCare") + " hasAds=" + infoJson.has("ads") + " hasVersion=" + infoJson.has("version"));
+        if (infoJson.has("eyeCare") && infoJson.get("eyeCare").isJsonObject()) {
+            JsonObject ec = infoJson.getAsJsonObject("eyeCare");
+            System.out.println("HOTUPDATE: eyeCare=" + ec.toString());
+            if (ec.has("enabled")) { Hawk.put(HawkConfig.PLAY_LIMIT_ENABLE, ec.get("enabled").getAsBoolean()); System.out.println("HOTUPDATE: put PLAY_LIMIT_ENABLE=" + ec.get("enabled").getAsBoolean()); }
+            if (ec.has("playLimitMinutes")) { Hawk.put(HawkConfig.PLAY_LIMIT_MINUTES, ec.get("playLimitMinutes").getAsInt()); System.out.println("HOTUPDATE: put PLAY_LIMIT_MINUTES=" + ec.get("playLimitMinutes").getAsInt()); }
+            if (ec.has("breakMinutes")) { Hawk.put(HawkConfig.BREAK_MINUTES, ec.get("breakMinutes").getAsInt()); System.out.println("HOTUPDATE: put BREAK_MINUTES=" + ec.get("breakMinutes").getAsInt()); }
+            if (ec.has("cooldownSeconds")) { Hawk.put(HawkConfig.BREAK_COOLDOWN_SECONDS, ec.get("cooldownSeconds").getAsInt()); System.out.println("HOTUPDATE: put BREAK_COOLDOWN=" + ec.get("cooldownSeconds").getAsInt()); }
+        }
+        // 广告标记云端库地址：触发拉取合并（AdCloudSync）
+        if (infoJson.has("ads") && infoJson.get("ads").isJsonObject()) {
+            String adsUrl = DefaultConfig.safeJsonString(infoJson.getAsJsonObject("ads"), "url", "");
+            if (!adsUrl.isEmpty()) {
+                Hawk.put(HawkConfig.AD_CLOUD_URL, adsUrl);
+                com.lucky.kidstv.util.AdCloudSync.pullAndMerge(App.getInstance());
+            }
+        }
+        // 配置版本号
+        if (infoJson.has("version")) {
+            Hawk.put(HawkConfig.CONFIG_VERSION, infoJson.get("version").getAsInt());
+        }
         // 直播播放请求头
         livePlayHeaders = infoJson.getAsJsonArray("livePlayHeaders");
         // 远端站点源
@@ -657,7 +680,7 @@ public class ApiConfig {
                 AdBlocker.addAdHost(host.getAsString());
             }
             //追加的广告拦截
-            if(infoJson.has("ads")){
+            if(infoJson.has("ads") && infoJson.get("ads").isJsonArray()){
                 for (JsonElement host : infoJson.getAsJsonArray("ads")) {
                     if(!AdBlocker.hasHost(host.getAsString())){
                         AdBlocker.addAdHost(host.getAsString());

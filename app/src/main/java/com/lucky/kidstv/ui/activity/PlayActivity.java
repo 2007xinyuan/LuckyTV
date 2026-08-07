@@ -80,6 +80,7 @@ import com.lucky.kidstv.ui.dialog.SearchSubtitleDialog;
 import com.lucky.kidstv.ui.dialog.SelectDialog;
 import com.lucky.kidstv.ui.dialog.SubtitleDialog;
 import com.lucky.kidstv.util.AdBlocker;
+import com.lucky.kidstv.util.AdCloudSync;
 import com.lucky.kidstv.util.DefaultConfig;
 import com.lucky.kidstv.util.FileUtils;
 import com.lucky.kidstv.util.HawkConfig;
@@ -881,11 +882,9 @@ public class PlayActivity extends BaseActivity {
                         }
                         mVideoView.start();
                         mController.resetSpeed();
-                        // 启动护眼计时 + 广告跳过 tick
-                        if (Hawk.get(HawkConfig.PLAY_LIMIT_ENABLE, false) || Hawk.get(HawkConfig.AD_SKIP_ENABLE, false)) {
-                            mHandler.removeMessages(MSG_PLAY_TICK);
-                            mHandler.sendEmptyMessageDelayed(MSG_PLAY_TICK, 1000);
-                        }
+                        // 启动护眼计时 + 广告跳过 tick（无条件：内置广告规则始终生效）
+                        mHandler.removeMessages(MSG_PLAY_TICK);
+                        mHandler.sendEmptyMessageDelayed(MSG_PLAY_TICK, 1000);
                     }
                 }
             }
@@ -1226,7 +1225,7 @@ public class PlayActivity extends BaseActivity {
                 }
                 if (event.getKeyCode() == KeyEvent.KEYCODE_MENU &&
                         event.getRepeatCount() == 0 && Hawk.get(HawkConfig.AD_SKIP_ENABLE, false)) {
-                    clearAdMarks();
+                    showAdMarkMenu();
                     return true;
                 }
             }
@@ -1245,7 +1244,12 @@ public class PlayActivity extends BaseActivity {
         super.onResume();
         if (mVideoView != null) {
             onStopCalled = false;
-            breakLaunched = false; // 休息页答对返回后允许下次再触发
+            // 从休息页返回：强制清零累计播放时间并记录冷却起点（防 BreakActivity 异常销毁未重置）
+            if (breakLaunched) {
+                Hawk.put(HawkConfig.PLAY_ACCUM_SECONDS, 0);
+                Hawk.put(HawkConfig.LAST_BREAK_END_TS, System.currentTimeMillis());
+            }
+            breakLaunched = false; // 休息页返回后允许下次再触发
             mVideoView.resume();
         }
     }
@@ -1439,25 +1443,34 @@ public class PlayActivity extends BaseActivity {
         if (mVideoView == null) return;
         // 护眼限时累计（仅正在播放时）
         if (Hawk.get(HawkConfig.PLAY_LIMIT_ENABLE, false) && mVideoView.isPlaying()) {
-            int limitMin = Hawk.get(HawkConfig.PLAY_LIMIT_MINUTES, 30);
-            if (limitMin > 0) {
-                int accum = Hawk.get(HawkConfig.PLAY_ACCUM_SECONDS, 0);
-                accum++;
-                Hawk.put(HawkConfig.PLAY_ACCUM_SECONDS, accum);
-                if (!breakLaunched && accum >= limitMin * 60) {
-                    breakLaunched = true;
-                    mVideoView.pause();
-                    Toast.makeText(this, "连续播放已满 " + limitMin + " 分钟，休息一下吧", Toast.LENGTH_LONG).show();
-                    startActivity(new Intent(this, BreakActivity.class));
-                    return;
+            // 冷却期：休息刚结束后的一段时间内不累计播放时长，避免"刚休息完又来一轮"
+            long lastBreak = Hawk.get(HawkConfig.LAST_BREAK_END_TS, 0L);
+            int cooldownSec = Hawk.get(HawkConfig.BREAK_COOLDOWN_SECONDS, 300);
+            if (cooldownSec > 0 && lastBreak > 0
+                    && System.currentTimeMillis() - lastBreak < cooldownSec * 1000L) {
+                // 仍在冷却期，不累计；直接跳过（广告检测仍执行）
+            } else {
+                int limitMin = Hawk.get(HawkConfig.PLAY_LIMIT_MINUTES, 30);
+                if (limitMin > 0) {
+                    int accum = Hawk.get(HawkConfig.PLAY_ACCUM_SECONDS, 0);
+                    accum++;
+                    Hawk.put(HawkConfig.PLAY_ACCUM_SECONDS, accum);
+                    if (!breakLaunched && accum >= limitMin * 60) {
+                        breakLaunched = true;
+                        mVideoView.pause();
+                        Toast.makeText(this, "连续播放已满 " + limitMin + " 分钟，休息一下吧", Toast.LENGTH_LONG).show();
+                        startActivity(new Intent(this, BreakActivity.class));
+                        return;
+                    }
                 }
             }
         }
         // 广告段自动跳过
-        if (Hawk.get(HawkConfig.AD_SKIP_ENABLE, false) && mVideoView.isPlaying() && videoURL != null) {
+        // 内置规则（量子源确定性广告）无条件生效；手动标记受 AD_SKIP_ENABLE 开关控制
+        if (mVideoView.isPlaying() && videoURL != null) {
             long pos = mVideoView.getCurrentPosition();
             if (pos > 0) {
-                long[] seg = getAdSegment(videoURL, pos);
+                long[] seg = getAdSegment(videoURL, pos, false);
                 if (seg != null) {
                     mVideoView.seekTo(seg[1]);
                     setTip("已跳过广告片段", true, false);
@@ -1498,10 +1511,42 @@ public class PlayActivity extends BaseActivity {
         // 简单去重: 若已存在相同段则不重复保存
         if (old.contains(start + ",")) return;
         Hawk.put(key, merged);
+        // 记录待回传云端（全局共享标记）
+        AdCloudSync.recordLocal(MD5.string2MD5(url), merged);
+        AdCloudSync.pushLocal();
     }
 
-    // 查询位置是否落在广告段内，返回该段 [start,end] 否则 null
-    private long[] getAdSegment(String url, long pos) {
+    /**
+     * 查询位置是否落在广告段内，返回该段 [start,end] 否则 null
+     * @param forceBuiltin true=无条件查内置规则+手动标记（菜单预览用）；false=内置规则无条件，手动标记受 AD_SKIP_ENABLE 控制
+     */
+    // 内置广告位置规则: {URL域名特征, 广告开始ms, 广告结束ms}
+    // 量子源(lz-cdn系列) 2026-08-04 实测8集(安全警长4集/超级飞侠2集/熊出没2集):
+    //   广告固定在 ~296-300s(第5分钟) 开始, ~322-323s 结束, 同一段赌博口播录音
+    // 非凡源(ffzy) 2026-08-05 用户实测: 安全警长 5:59(~359s) 也有博彩口播广告, 内容与量子源不同,
+    //   暂未确认是否固定位置(仅1集样本), 未加内置规则——手动标记(INFO/MENU)已覆盖, 待更多实测再补规则
+    private static final String[][] BUILTIN_AD_RULES = {
+            {"lz-cdn", "296000", "323000"},
+            {"cdnlz", "296000", "323000"},
+    };
+
+    private long[] getAdSegment(String url, long pos, boolean forceBuiltin) {
+        // 1. 内置规则（按源域名特征匹配，装好即生效，不受开关控制）
+        if (url != null) {
+            String lower = url.toLowerCase();
+            for (String[] rule : BUILTIN_AD_RULES) {
+                if (lower.contains(rule[0])) {
+                    long start = Long.parseLong(rule[1]);
+                    long end = Long.parseLong(rule[2]);
+                    if (pos >= start - 500 && pos <= end + 500) {
+                        return new long[]{start, end};
+                    }
+                }
+            }
+        }
+        // 2. 用户手动标记（MENU键菜单标记）——受 AD_SKIP_ENABLE 开关控制
+        if (url == null) return null;
+        if (!forceBuiltin && !Hawk.get(HawkConfig.AD_SKIP_ENABLE, false)) return null;
         String key = HawkConfig.AD_SEGMENTS_PREFIX + MD5.string2MD5(url);
         String data = Hawk.get(key, "");
         if (data.isEmpty()) return null;
@@ -1529,6 +1574,38 @@ public class PlayActivity extends BaseActivity {
         Hawk.delete(key);
         adMarkStartMs = -1;
         Toast.makeText(this, "已清除本视频广告标记", Toast.LENGTH_SHORT).show();
+    }
+
+    // 广告标记菜单：MENU 键弹出（标记起点/终点/清除）
+    private void showAdMarkMenu() {
+        if (videoURL == null) {
+            Toast.makeText(this, "视频尚未开始，无法标记", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        boolean marking = adMarkStartMs >= 0;
+        String markLabel = marking ? "标记广告终点(当前时间)并保存" : "标记广告起点(当前时间)";
+        List<String> options = new ArrayList<>();
+        options.add(markLabel);
+        options.add("清除本视频广告标记");
+        options.add("取消");
+        SelectDialog<String> dialog = new SelectDialog<>(this);
+        dialog.setTip("广告段标记：广告开始时选“标记起点”，结束时选“标记终点”");
+        dialog.setAdapter(null, new SelectDialogAdapter.SelectDialogInterface<String>() {
+            @Override
+            public void click(String value, int pos) {
+                if (pos == 0) {
+                    toggleAdMark();
+                } else if (pos == 1) {
+                    clearAdMarks();
+                }
+            }
+
+            @Override
+            public String getDisplay(String val) {
+                return val;
+            }
+        }, SelectDialogAdapter.stringDiff, options, 0);
+        dialog.show();
     }
 
     public void play(boolean reset) {

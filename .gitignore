@@ -24,3 +24,9 @@ fix_braces.py
 fix_nesting.py
 _verify/
 TEST_PLAN.md
+
+# 本地调试截图/脚本
+*.png
+ui*.xml
+qiniu_*.py
+upload_config.py

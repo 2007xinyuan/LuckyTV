@@ -16,8 +16,8 @@ android {
                 // CI 用 setup-python 安装的版本（在PATH上）
                 buildPython("python3")
             } else {
-                // 通用：使用 PATH 上的 python；本机如需指定绝对路径可在此覆盖
-                buildPython("python")
+                // 本机编译: Python310 绝对路径 (chaquopy 不支持 3.13)
+                buildPython("C:/Users/Administrator/AppData/Local/Programs/Python/Python310/python.exe")
             }
             pip {
                 install "lxml"

@@ -21,6 +21,7 @@ import com.lucky.kidstv.bean.SourceBean;
 import com.lucky.kidstv.cache.RoomDataManger;
 import com.lucky.kidstv.cache.VodCollect;
 import com.lucky.kidstv.event.RefreshEvent;
+import com.blankj.utilcode.util.GsonUtils;
 import com.lucky.kidstv.util.DefaultConfig;
 import com.lucky.kidstv.util.HawkConfig;
 import com.lucky.kidstv.util.LOG;
@@ -358,6 +359,19 @@ public class SourceViewModel extends ViewModel {
 
     // categoryContent
     public void getList(MovieSort.SortData sortData, int page) {
+        // 知识板块：edusrc:=指定知识源内容，edu:root=子分类入口，edu:<作品名>=按词搜索
+        if (sortData != null && sortData.id != null && sortData.id.startsWith("edusrc:")) {
+            eduSourceList(sortData.id.substring("edusrc:".length()), page);
+            return;
+        }
+        if (sortData != null && sortData.id != null && sortData.id.startsWith("edu:")) {
+            if ("edu:root".equals(sortData.id)) {
+                eduRoot();
+            } else {
+                eduSearch(sortData.id.substring(4), page);
+            }
+            return;
+        }
         SourceBean homeSourceBean = ApiConfig.get().getHomeSourceBean();
         int type = homeSourceBean.getType();
         if (type == 3) {
@@ -466,12 +480,213 @@ public class SourceViewModel extends ViewModel {
         }
     }
 
+    // 知识板块根：返回学科子分类入口(folder 卡片)，点 folder 后加载对应知识源内容
+    private void eduRoot() {
+        // [显示名, 源key, 适配年龄段(逗号分隔; 空=全年龄)]
+        String[][] eduSources = {
+                {"科学", "科学", "6-9,9-12"}, {"英语", "英语", "3-6,6-9,9-12"}, {"国学", "国学", "6-9,9-12"},
+                {"地理", "地理", "6-9,9-12"}, {"编程", "编程", "9-12"}, {"识字", "识字", "3-6,6-9"},
+                {"拼音", "拼音", "3-6"}, {"思维", "思维", "3-6,6-9"}, {"口才", "口才", "3-6,6-9"},
+                {"少儿", "哔哩少儿", "3-6,6-9,9-12"}, {"儿歌", "Cat_聚合儿歌", "3-6"}
+        };
+        String age = getAgeFilter(); // null=未启用适龄筛选(全部)
+        List<Movie.Video> folders = new ArrayList<>();
+        for (String[] es : eduSources) {
+            if (age != null && es[2] != null && !es[2].isEmpty() && !es[2].contains(age)) {
+                continue; // 适龄筛选: 子分类不适配当前年龄段 -> 隐藏
+            }
+            Movie.Video v = new Movie.Video();
+            v.id = "edusrc:" + es[1];
+            v.name = es[0];
+            v.tag = "folder";
+            v.type = "知识";
+            folders.add(v);
+        }
+        Movie movie = new Movie();
+        movie.videoList = folders;
+        AbsXml absXml = new AbsXml();
+        absXml.movie = movie;
+        listResult.postValue(absXml);
+        LOG.i("echo-eduRoot-done: age=" + age + " folders=" + folders.size());
+    }
+
+    // 知识板块：加载指定知识源(type3)的内容列表
+    private void eduSourceList(final String sourceKey, final int page) {
+        if (page > 1) {
+            listResult.postValue(null);
+            return;
+        }
+        spThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    SourceBean sb = ApiConfig.get().getSource(sourceKey);
+                    if (sb == null || sb.getType() != 3) {
+                        listResult.postValue(null);
+                        return;
+                    }
+                    final Spider sp = ApiConfig.get().getCSP(sb);
+                    ExecutorService executor = Executors.newSingleThreadExecutor();
+                    Future<String> future = executor.submit(new Callable<String>() {
+                        @Override
+                        public String call() throws Exception {
+                            return sp.homeContent(true);
+                        }
+                    });
+                    String sortJson = null;
+                    try {
+                        sortJson = future.get(20, TimeUnit.SECONDS);
+                    } catch (TimeoutException e) {
+                        e.printStackTrace();
+                        future.cancel(true);
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            executor.shutdown();
+                        } catch (Throwable th) {
+                            th.printStackTrace();
+                        }
+                    }
+                    if (!TextUtils.isEmpty(sortJson)) {
+                        AbsXml absXml = json(null, sortJson, sb.getKey());
+                        if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && !absXml.movie.videoList.isEmpty()) {
+                            // 只保留公开发行的精良制作，过滤个人自制/低质内容
+                            // 适龄筛选: 标题含明确年龄段词(学前/小学/初中等)时校验匹配, 无年龄词放行
+                            List<Movie.Video> filtered = new ArrayList<>();
+                            for (Movie.Video v : absXml.movie.videoList) {
+                                if (isQualityContent(v) && isEduContentAllowedByAge(v.name)) filtered.add(v);
+                            }
+                            if (!filtered.isEmpty()) {
+                                absXml.movie.videoList = filtered;
+                                listResult.postValue(absXml);
+                                LOG.i("echo-eduSourceList-done: " + sourceKey + " count=" + filtered.size());
+                                return;
+                            }
+                        }
+                    }
+                    listResult.postValue(null);
+                    LOG.i("echo-eduSourceList-empty: " + sourceKey);
+                } catch (Throwable th) {
+                    LOG.e("echo-eduSourceList-ERR: " + th.getMessage());
+                    listResult.postValue(null);
+                }
+            }
+        });
+    }
+
+    // 科普教育板块：按词多源聚合搜索（优先干净源「非凡动画」，再补全部 type0/1 源）
+    private void eduSearch(final String wd, final int page) {
+        if (page > 1) {
+            listResult.postValue(null);
+            return;
+        }
+        spThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final List<Movie.Video> merged = new ArrayList<>();
+                    final Set<String> seen = new HashSet<>();
+                    List<SourceBean> candidates = new ArrayList<>();
+                    SourceBean ffzy = ApiConfig.get().getSource("非凡动画");
+                    if (ffzy != null) candidates.add(ffzy);
+                    for (SourceBean sb : ApiConfig.get().getSourceBeanList()) {
+                        if (sb == null || sb.getKey() == null) continue;
+                        if (ffzy != null && ffzy.getKey() != null && sb.getKey().equals(ffzy.getKey())) continue;
+                        if (sb.getType() == 0 || sb.getType() == 1) candidates.add(sb);
+                    }
+                    if (candidates.isEmpty()) {
+                        SourceBean home = ApiConfig.get().getHomeSourceBean();
+                        if (home != null) candidates.add(home);
+                    }
+                    for (final SourceBean cand : candidates) {
+                        final CountDownLatch latch = new CountDownLatch(1);
+                        final List<Movie.Video> found = new ArrayList<>();
+                        OkGo.<String>get(cand.getApi())
+                                .params("wd", wd)
+                                .params(cand.getType() == 1 ? "ac" : null, cand.getType() == 1 ? "detail" : null)
+                                .tag("edu_search")
+                                .execute(new AbsCallback<String>() {
+                                    @Override
+                                    public String convertResponse(okhttp3.Response response) throws Throwable {
+                                        if (response.body() != null) return response.body().string();
+                                        throw new IllegalStateException("网络请求错误");
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Response<String> response) {
+                                        try {
+                                            String body = response.body();
+                                            if (!TextUtils.isEmpty(body)) {
+                                                AbsXml absXml = (cand.getType() == 0) ? xml(null, body, cand.getKey()) : json(null, body, cand.getKey());
+                                                if (absXml != null && absXml.movie != null && absXml.movie.videoList != null) {
+                                                    for (Movie.Video v : absXml.movie.videoList) {
+                                                        if (v == null || v.name == null) continue;
+                                                        if (!isQualityContent(v)) continue;
+                                                        if (!isEduContentAllowedByAge(v.name)) continue;
+                                                        v.sourceKey = cand.getKey();
+                                                        found.add(v);
+                                                    }
+                                                }
+                                            }
+                                        } catch (Throwable th) {
+                                            LOG.e("echo-eduSearch-parse-ERR: " + th.getMessage());
+                                        } finally {
+                                            latch.countDown();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onError(Response<String> response) {
+                                        super.onError(response);
+                                        latch.countDown();
+                                    }
+                                });
+                        try {
+                            latch.await(8, TimeUnit.SECONDS);
+                        } catch (InterruptedException ignored) {
+                        }
+                        if (!found.isEmpty()) {
+                            for (Movie.Video v : found) {
+                                String key = (v.id == null ? "" : v.id) + "_" + v.name;
+                                if (seen.add(key)) merged.add(v);
+                            }
+                            LOG.i("echo-eduSearch-hit: " + wd + " @ " + cand.getKey() + " count=" + found.size());
+                        }
+                    }
+                    if (!merged.isEmpty()) {
+                        Movie movie = new Movie();
+                        movie.videoList = merged;
+                        AbsXml absXml = new AbsXml();
+                        absXml.movie = movie;
+                        listResult.postValue(absXml);
+                        LOG.i("echo-eduSearch-done: " + wd + " merged=" + merged.size());
+                    } else {
+                        listResult.postValue(null);
+                        LOG.i("echo-eduSearch-done: " + wd + " empty");
+                    }
+                } catch (Throwable th) {
+                    LOG.e("echo-eduSearch-ERR: " + th.getMessage());
+                    listResult.postValue(null);
+                }
+            }
+        });
+    }
+
     interface HomeRecCallback {
         void done(List<Movie.Video> videos);
     }
 
     // 儿童模式: 首页推荐注入 = 配置白名单动画(按片名搜索所有type0/1源) + 用户收藏影片; 过滤B站解说/自制视频
     private void injectHomeVideos(final SourceBean sourceBean, final AbsSortXml sortXml, final String sourceKey) {
+        // 启动提速: 磁盘缓存秒开(上次搜索结果直接渲染首页, 后台再异步刷新)
+        final List<Movie.Video> cached = loadHomeVideosCache(sourceKey);
+        if (cached != null && !cached.isEmpty() && sortXml != null) {
+            sortXml.videoList = cached;
+            sortResult.postValue(sortXml);
+            sortCache.put(sourceKey, sortXml);
+            LOG.i("echo-injectHomeVideos-cache-hit: " + cached.size());
+        }
         spThreadPool.execute(new Runnable() {
             @Override
             public void run() {
@@ -582,6 +797,7 @@ public class SourceViewModel extends ViewModel {
                         sortXml.videoList = merged;
                         sortResult.postValue(sortXml);
                         sortCache.put(sourceKey, sortXml);
+                        saveHomeVideosCache(sourceKey, merged);
                     }
                     LOG.i("echo-injectHomeVideos-done: whitelist=" + (whitelist == null ? 0 : whitelist.size()) + " merged=" + merged.size());
                 } catch (Throwable th) {
@@ -595,8 +811,43 @@ public class SourceViewModel extends ViewModel {
         });
     }
 
+    // 首页推荐磁盘缓存: 读(12小时有效, 按源+适龄分键)
+    private List<Movie.Video> loadHomeVideosCache(String sourceKey) {
+        try {
+            String json = Hawk.get(HOME_VIDEOS_CACHE_PREFIX + sourceKey + "_" + getAgeFilter(), "");
+            if (TextUtils.isEmpty(json)) return null;
+            HomeVideosCache cache = GsonUtils.fromJson(json, HomeVideosCache.class);
+            if (cache == null || cache.time <= 0 || cache.videos == null || cache.videos.isEmpty()) return null;
+            if (System.currentTimeMillis() - cache.time > HOME_VIDEOS_CACHE_TTL) return null;
+            return cache.videos;
+        } catch (Throwable th) {
+            return null;
+        }
+    }
+
+    // 首页推荐磁盘缓存: 写
+    private void saveHomeVideosCache(String sourceKey, List<Movie.Video> videos) {
+        try {
+            if (videos == null || videos.isEmpty()) return;
+            HomeVideosCache cache = new HomeVideosCache();
+            cache.time = System.currentTimeMillis();
+            cache.videos = videos;
+            Hawk.put(HOME_VIDEOS_CACHE_PREFIX + sourceKey + "_" + getAgeFilter(), GsonUtils.toJson(cache));
+        } catch (Throwable ignored) {
+        }
+    }
+
+    private static final String HOME_VIDEOS_CACHE_PREFIX = "home_videos_cache_v1_";
+    private static final long HOME_VIDEOS_CACHE_TTL = 12 * 60 * 60 * 1000L;
+
+    public static class HomeVideosCache {
+        public long time;
+        public List<Movie.Video> videos;
+    }
+
     // 适龄过滤: 白名单动画必须命中片名关键词, 且排除B站解说/自制/混剪/盘点/预告等
     private boolean isKidFriendlyAnime(Movie.Video v, String whitelistName) {
+        if (!isQualityContent(v)) return false;
         if (v == null || v.name == null) return false;
         String n = v.name.trim();
         String[] bad = {"解说", "自制", "混剪", "盘点", "预告", "花絮", "吐槽", "剪辑", "UP主", "配音", "合集", "片段"};
@@ -607,6 +858,47 @@ public class SourceViewModel extends ViewModel {
         if (whitelistName == null || whitelistName.isEmpty()) return false;
         String w = whitelistName.trim();
         if (!n.contains(w) && !n.contains(w.substring(0, Math.min(3, w.length())))) return false;
+        return true;
+    }
+
+    // 内容质量过滤: 排除个人自制/低质内容, 只保留公开发行的精良制作
+    private boolean isQualityContent(Movie.Video v) {
+        if (v == null || v.name == null) return false;
+        String n = v.name.trim();
+        if (n.isEmpty() || n.length() < 3) return false;
+        String[] bad = {"UP主", "自制", "个人", "混剪", "盘点", "解说", "花絮", "吐槽", "剪辑", "片段",
+                "合集", "预告", "配音", "vlog", "Vlog", "日常", "随手拍", "手机拍摄", "试看", "抢先",
+                "饭制", "同人", "翻拍", "练习", "课堂实录", "直播回放", "搬运", "转码", "demo", "Demo"};
+        for (String b : bad) {
+            if (n.contains(b)) return false;
+        }
+        return true;
+    }
+
+    // 知识板块内容适龄校验: 标题含明确年龄段词时须与当前适龄筛选匹配; 无年龄词放行(避免误杀)
+    // 年龄段词映射: 3-6岁=学前/启蒙/幼儿/宝宝/儿歌; 6-9岁=小学/一年级~三年级/少儿; 9-12岁=四~六年级/初中/进阶/竞赛
+    private boolean isEduContentAllowedByAge(String title) {
+        String age = getAgeFilter();
+        if (age == null) return true; // 未启用适龄筛选 -> 全部放行
+        if (title == null || title.isEmpty()) return true;
+        String n = title.trim();
+        if ("3-6".equals(age)) {
+            // 大龄内容在 3-6 岁档隐藏
+            return !(n.contains("小学") || n.contains("一年级") || n.contains("二年级") || n.contains("三年级")
+                    || n.contains("四年级") || n.contains("五年级") || n.contains("六年级")
+                    || n.contains("初中") || n.contains("进阶") || n.contains("竞赛"));
+        } else if ("6-9".equals(age)) {
+            // 低龄内容在 6-9 岁档隐藏
+            if (n.contains("学前") || n.contains("启蒙") || n.contains("宝宝") || n.contains("儿歌")) {
+                return false;
+            }
+            // 大龄内容在 6-9 岁档隐藏
+            return !(n.contains("初中") || n.contains("六年级") || n.contains("竞赛") || n.contains("进阶"));
+        } else if ("9-12".equals(age)) {
+            // 低龄内容在 9-12 岁档隐藏
+            return !(n.contains("学前") || n.contains("启蒙") || n.contains("宝宝") || n.contains("儿歌")
+                    || n.contains("一年级") || n.contains("二年级") || n.contains("三年级"));
+        }
         return true;
     }
 

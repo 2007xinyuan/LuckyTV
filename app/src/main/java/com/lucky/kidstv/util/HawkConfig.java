@@ -79,10 +79,15 @@ public class HawkConfig {
     public static final String PLAY_LIMIT_MINUTES = "play_limit_minutes"; // 连续播放 N 分钟后休息（默认30）
     public static final String BREAK_MINUTES = "break_minutes";           // 休息 N 分钟（默认5）
     public static final String PLAY_ACCUM_SECONDS = "play_accum_seconds"; // 已累计播放秒数（跨视频累计）
+    public static final String LAST_BREAK_END_TS = "last_break_end_ts";   // 上次休息结束时间戳(ms)，用于休息冷却期防连击
+    public static final String BREAK_COOLDOWN_SECONDS = "break_cooldown_seconds"; // 休息结束后冷却期(秒)，期内不累计播放时长，默认300
 
     // 广告视频识别跳过（新葡京等广告是硬剪辑进正片视频流的，需手动标记广告段后自动跳过）
     public static final String AD_SKIP_ENABLE = "ad_skip_enable";   // 是否开启广告段自动跳过
     public static final String AD_SEGMENTS_PREFIX = "ad_segments_"; // 视频广告段表: ad_segments_<md5(url)> = "start1,end1;start2,end2"（毫秒）
+    public static final String AD_CLOUD_URL = "ad_cloud_url";       // 云端广告标记库地址（七牛公开读）
+    public static final String AD_CLOUD_PUSH = "ad_cloud_push";     // 是否允许本地标记回传云端（默认 true）
+    public static final String CONFIG_VERSION = "config_version";   // 云端配置版本号（热更新对比用）
     public static final String AD_MARK_START_HINT = "已标记广告起点，播到广告结束再按一次";
     public static final String AD_MARK_END_HINT = "已标记广告段并保存，下次播放将自动跳过";
 

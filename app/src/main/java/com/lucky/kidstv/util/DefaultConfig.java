@@ -61,6 +61,8 @@ public class DefaultConfig {
         }
         if (withMy)
             data.add(0, new MovieSort.SortData("my0", HomeActivity.getRes().getString(R.string.app_home)));
+        // 知识板块：导航栏单个入口(id=edu:root)，内部按子栏目(具体作品)搜索加载
+        data.add(new MovieSort.SortData("edu:root", "知识"));
         Collections.sort(data);
         return data;
     }

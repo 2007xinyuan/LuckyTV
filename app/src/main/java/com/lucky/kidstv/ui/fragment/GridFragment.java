@@ -232,7 +232,10 @@ public class GridFragment extends BaseLazyFragment {
 
             @Override
             public void onItemClick(TvRecyclerView parent, View itemView, int position) {
-
+                // TV 焦点 OK 键点击：转发到 BaseQuickAdapter 点击监听（触摸通道共用同一逻辑）
+                if (gridAdapter.getOnItemClickListener() != null) {
+                    gridAdapter.getOnItemClickListener().onItemClick(gridAdapter, itemView, position);
+                }
             }
         });
         mGridView.setOnInBorderKeyEventListener(new TvRecyclerView.OnInBorderKeyEventListener() {
@@ -306,9 +309,11 @@ public class GridFragment extends BaseLazyFragment {
 //                if(mGridView != null) mGridView.requestFocus();
                 if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && absXml.movie.videoList.size() > 0) {
                     // 儿童模式: 适龄筛选 -> 过滤非适龄影片(仅标题命中年龄段白名单的保留)
+                    // 知识板块(edu:/edusrc:)为已筛选的教育内容, 不按动画白名单过滤
+                    final boolean isEduTab = sortData != null && sortData.id != null && sortData.id.startsWith("edu");
                     ArrayList<Movie.Video> filtered = new ArrayList<>();
                     for (Movie.Video v : absXml.movie.videoList) {
-                        if (v != null && SourceViewModel.isTitleAllowedByAge(v.name)) {
+                        if (v != null && (isEduTab || SourceViewModel.isTitleAllowedByAge(v.name))) {
                             filtered.add(v);
                         }
                     }

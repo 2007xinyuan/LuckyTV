@@ -1,268 +1,268 @@
 {
- "logo": "https://ncstatic-file.clewm.net/rsrc/2025/0930/20/945a6372224243d3f3d63cb309c0b7b1.png",
- "spider": "https://ncstatic-file.clewm.net/rsrc/2026/0731/14/896ff0bd21906fe9812402eaff8d44b6.jpg;md5;6a12b77fcaf9b8d15e7da1a065cc788e",
- "wallpaper": "http://127.0.0.1:9978/proxy?do=wallpaper",
- "ageGroups": {
-  "3-6": [
-   "安全警长啦咘啦哆",
-   "布鲁伊",
-   "小猪佩奇",
-   "萌鸡小队",
-   "宝宝巴士",
-   "超级飞侠",
-   "海底小纵队",
-   "汪汪队立大功"
+  "logo": "https://ncstatic-file.clewm.net/rsrc/2025/0930/20/945a6372224243d3f3d63cb309c0b7b1.png",
+  "spider": "https://ncstatic-file.clewm.net/rsrc/2026/0731/14/896ff0bd21906fe9812402eaff8d44b6.jpg;md5;6a12b77fcaf9b8d15e7da1a065cc788e",
+  "wallpaper": "http://127.0.0.1:9978/proxy?do=wallpaper",
+  "ageGroups": {
+    "3-6": [
+      "安全警长啦咘啦哆",
+      "布鲁伊",
+      "小猪佩奇",
+      "萌鸡小队",
+      "宝宝巴士",
+      "超级飞侠",
+      "海底小纵队",
+      "汪汪队立大功"
+    ],
+    "6-9": [
+      "安全警长啦咘啦哆",
+      "布鲁伊",
+      "汪汪队立大功",
+      "超级飞侠",
+      "托马斯小火车",
+      "猪猪侠之竞速小英雄",
+      "萌鸡小队"
+    ],
+    "9-12": [
+      "熊出没",
+      "喜羊羊与灰太狼",
+      "巴啦啦小魔仙",
+      "猪猪侠之竞速小英雄"
+    ]
+  },
+  "homeVideos": [
+    "安全警长啦咘啦哆",
+    "布鲁伊",
+    "汪汪队立大功",
+    "超级飞侠",
+    "猪猪侠之竞速小英雄",
+    "小猪佩奇",
+    "熊出没",
+    "喜羊羊与灰太狼",
+    "萌鸡小队",
+    "海底小纵队",
+    "托马斯小火车",
+    "宝宝巴士",
+    "巴啦啦小魔仙"
   ],
-  "6-9": [
-   "安全警长啦咘啦哆",
-   "布鲁伊",
-   "汪汪队立大功",
-   "超级飞侠",
-   "托马斯小火车",
-   "猪猪侠之竞速小英雄",
-   "萌鸡小队"
+  "sites": [
+    {
+      "key": "非凡动画",
+      "name": "主源|非凡",
+      "type": 1,
+      "api": "https://api.ffzyapi.com/api.php/provide/vod/?ac=list",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "categories": [
+        "动漫片",
+        "国产动漫",
+        "欧美动漫"
+      ]
+    },
+    {
+      "key": "量子动画",
+      "name": "备用|量子",
+      "type": 1,
+      "api": "https://cj.lziapi.com/api.php/provide/vod/?ac=list",
+      "homeTid": "30",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "categories": [
+        "国产动漫",
+        "日韩动漫",
+        "欧美动漫"
+      ]
+    },
+    {
+      "key": "动画片大全",
+      "name": "动画|大全",
+      "type": 3,
+      "api": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/js/%E5%8A%A8%E7%94%BB%E7%89%87%E5%A4%A7%E5%85%A8.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "哔哩少儿",
+      "name": "少儿|哔哩",
+      "type": 3,
+      "api": "csp_Bili",
+      "searchable": 0,
+      "quickSearch": 0,
+      "filterable": 0,
+      "ext": {
+        "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+        "json": "https://cdn.jsdelivr.net/gh/2007xinyuan/LuckyTV@main/app/src/main/assets/bili_age.json"
+      },
+      "style": {
+        "type": "rect",
+        "ratio": 1.597
+      }
+    },
+    {
+      "key": "Cat_聚合儿歌",
+      "name": "聚合|儿童",
+      "type": 3,
+      "api": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/js/erge_juhe.js",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 1
+    },
+    {
+      "key": "口才",
+      "name": "口才|儿童",
+      "type": 3,
+      "api": "csp_Bili",
+      "searchable": 0,
+      "quickSearch": 0,
+      "filterable": 0,
+      "ext": {
+        "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+        "json": "https://cdn.jsdelivr.net/gh/ouhaibo1980/tvbox@main/Bil/儿童口才.json"
+      },
+      "style": {
+        "type": "rect",
+        "ratio": 1.597
+      }
+    },
+    {
+      "key": "拼音",
+      "name": "拼音|儿童",
+      "type": 3,
+      "api": "csp_Bili",
+      "searchable": 0,
+      "quickSearch": 0,
+      "filterable": 0,
+      "ext": {
+        "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+        "json": "https://cdn.jsdelivr.net/gh/ouhaibo1980/tvbox@main/Bil/儿童拼音.json"
+      },
+      "style": {
+        "type": "rect",
+        "ratio": 1.597
+      }
+    },
+    {
+      "key": "识字",
+      "name": "识字|儿童",
+      "type": 3,
+      "api": "csp_Bili",
+      "searchable": 0,
+      "quickSearch": 0,
+      "filterable": 0,
+      "ext": {
+        "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+        "json": "https://cdn.jsdelivr.net/gh/ouhaibo1980/tvbox@main/Bil/儿童识字.json"
+      },
+      "style": {
+        "type": "rect",
+        "ratio": 1.597
+      }
+    },
+    {
+      "key": "思维",
+      "name": "思维|儿童",
+      "type": 3,
+      "api": "csp_Bili",
+      "searchable": 0,
+      "quickSearch": 0,
+      "filterable": 0,
+      "ext": {
+        "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+        "json": "https://cdn.jsdelivr.net/gh/ouhaibo1980/tvbox@main/Bil/儿童思维.json"
+      },
+      "style": {
+        "type": "rect",
+        "ratio": 1.597
+      }
+    },
+    {
+      "key": "英语",
+      "name": "英语|儿童",
+      "type": 3,
+      "api": "csp_Bili",
+      "searchable": 0,
+      "quickSearch": 0,
+      "filterable": 0,
+      "ext": {
+        "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+        "json": "https://cdn.jsdelivr.net/gh/ouhaibo1980/tvbox@main/Bil/儿童英语.json"
+      },
+      "style": {
+        "type": "rect",
+        "ratio": 1.597
+      }
+    },
+    {
+      "key": "科学",
+      "name": "科学|哔哩",
+      "type": 3,
+      "api": "csp_Bili",
+      "searchable": 0,
+      "quickSearch": 0,
+      "filterable": 0,
+      "ext": {
+        "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+        "json": "https://cdn.jsdelivr.net/gh/ouhaibo1980/tvbox@main/Bil/小灯塔科学.json"
+      },
+      "style": {
+        "type": "rect",
+        "ratio": 1.597
+      }
+    },
+    {
+      "key": "国学",
+      "name": "国学|哔哩",
+      "type": 3,
+      "api": "csp_Bili",
+      "searchable": 0,
+      "quickSearch": 0,
+      "filterable": 0,
+      "ext": {
+        "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+        "json": "https://cdn.jsdelivr.net/gh/ouhaibo1980/tvbox@main/Bil/小灯塔国学.json"
+      },
+      "style": {
+        "type": "rect",
+        "ratio": 1.597
+      }
+    },
+    {
+      "key": "地理",
+      "name": "地理|哔哩",
+      "type": 3,
+      "api": "csp_Bili",
+      "searchable": 0,
+      "quickSearch": 0,
+      "filterable": 0,
+      "ext": {
+        "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+        "json": "https://cdn.jsdelivr.net/gh/ouhaibo1980/tvbox@main/Bil/小灯塔地理.json"
+      },
+      "style": {
+        "type": "rect",
+        "ratio": 1.597
+      }
+    },
+    {
+      "key": "编程",
+      "name": "编程|哔哩",
+      "type": 3,
+      "api": "csp_Bili",
+      "searchable": 0,
+      "quickSearch": 0,
+      "filterable": 0,
+      "ext": {
+        "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
+        "json": "https://cdn.jsdelivr.net/gh/ouhaibo1980/tvbox@main/Bil/儿童编程.json"
+      },
+      "style": {
+        "type": "rect",
+        "ratio": 1.597
+      }
+    }
   ],
-  "9-12": [
-   "熊出没",
-   "喜羊羊与灰太狼",
-   "巴啦啦小魔仙",
-   "猪猪侠之竞速小英雄"
-  ]
- },
- "homeVideos": [
-  "安全警长啦咘啦哆",
-  "布鲁伊",
-  "汪汪队立大功",
-  "超级飞侠",
-  "猪猪侠之竞速小英雄",
-  "小猪佩奇",
-  "熊出没",
-  "喜羊羊与灰太狼",
-  "萌鸡小队",
-  "海底小纵队",
-  "托马斯小火车",
-  "宝宝巴士",
-  "巴啦啦小魔仙"
- ],
- "sites": [
-  {
-   "key": "非凡动画",
-   "name": "主源|非凡",
-   "type": 1,
-   "api": "https://api.ffzyapi.com/api.php/provide/vod/?ac=list",
-   "searchable": 1,
-   "quickSearch": 1,
-   "filterable": 1,
-   "categories": [
-    "动漫片",
-    "国产动漫",
-    "欧美动漫"
-   ]
-  },
-  {
-   "key": "量子动画",
-   "name": "备用|量子",
-   "type": 1,
-   "api": "https://cj.lziapi.com/api.php/provide/vod/?ac=list",
-   "homeTid": "30",
-   "searchable": 1,
-   "quickSearch": 1,
-   "filterable": 1,
-   "categories": [
-    "国产动漫",
-    "日韩动漫",
-    "欧美动漫"
-   ]
-  },
-  {
-   "key": "动画片大全",
-   "name": "动画|大全",
-   "type": 3,
-   "api": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/js/%E5%8A%A8%E7%94%BB%E7%89%87%E5%A4%A7%E5%85%A8.js",
-   "searchable": 1,
-   "quickSearch": 1,
-   "filterable": 1
-  },
-  {
-   "key": "哔哩少儿",
-   "name": "少儿|哔哩",
-   "type": 3,
-   "api": "csp_Bili",
-   "searchable": 0,
-   "quickSearch": 0,
-   "filterable": 0,
-   "ext": {
-    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/2007xinyuan/LuckyTV@main/app/src/main/assets/bili_age.json"
-   },
-   "style": {
-    "type": "rect",
-    "ratio": 1.597
-   }
-  },
-  {
-   "key": "Cat_聚合儿歌",
-   "name": "聚合|儿童",
-   "type": 3,
-   "api": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox@main/js/erge_juhe.js",
-   "searchable": 1,
-   "quickSearch": 0,
-   "filterable": 1
-  },
-  {
-   "key": "口才",
-   "name": "口才|儿童",
-   "type": 3,
-   "api": "csp_Bili",
-   "searchable": 0,
-   "quickSearch": 0,
-   "filterable": 0,
-   "ext": {
-    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%84%BF%E7%AB%A5%E5%8F%A3%E6%89%8D.json"
-   },
-   "style": {
-    "type": "rect",
-    "ratio": 1.597
-   }
-  },
-  {
-   "key": "拼音",
-   "name": "拼音|儿童",
-   "type": 3,
-   "api": "csp_Bili",
-   "searchable": 0,
-   "quickSearch": 0,
-   "filterable": 0,
-   "ext": {
-    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%84%BF%E7%AB%A5%E6%8B%BC%E9%9F%B3.json"
-   },
-   "style": {
-    "type": "rect",
-    "ratio": 1.597
-   }
-  },
-  {
-   "key": "识字",
-   "name": "识字|儿童",
-   "type": 3,
-   "api": "csp_Bili",
-   "searchable": 0,
-   "quickSearch": 0,
-   "filterable": 0,
-   "ext": {
-    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%84%BF%E7%AB%A5%E8%AF%86%E5%AD%97.json"
-   },
-   "style": {
-    "type": "rect",
-    "ratio": 1.597
-   }
-  },
-  {
-   "key": "思维",
-   "name": "思维|儿童",
-   "type": 3,
-   "api": "csp_Bili",
-   "searchable": 0,
-   "quickSearch": 0,
-   "filterable": 0,
-   "ext": {
-    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%84%BF%E7%AB%A5%E6%80%9D%E7%BB%B4.json"
-   },
-   "style": {
-    "type": "rect",
-    "ratio": 1.597
-   }
-  },
-  {
-   "key": "英语",
-   "name": "英语|儿童",
-   "type": 3,
-   "api": "csp_Bili",
-   "searchable": 0,
-   "quickSearch": 0,
-   "filterable": 0,
-   "ext": {
-    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%84%BF%E7%AB%A5%E8%8B%B1%E8%AF%AD.json"
-   },
-   "style": {
-    "type": "rect",
-    "ratio": 1.597
-   }
-  },
-  {
-   "key": "科学",
-   "name": "科学|哔哩",
-   "type": 3,
-   "api": "csp_Bili",
-   "searchable": 0,
-   "quickSearch": 0,
-   "filterable": 0,
-   "ext": {
-    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%B0%8F%E7%81%AF%E5%A1%94%E7%A7%91%E5%AD%A6.json"
-   },
-   "style": {
-    "type": "rect",
-    "ratio": 1.597
-   }
-  },
-  {
-   "key": "国学",
-   "name": "国学|哔哩",
-   "type": 3,
-   "api": "csp_Bili",
-   "searchable": 0,
-   "quickSearch": 0,
-   "filterable": 0,
-   "ext": {
-    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%B0%8F%E7%81%AF%E5%A1%94%E5%9B%BD%E5%AD%A6.json"
-   },
-   "style": {
-    "type": "rect",
-    "ratio": 1.597
-   }
-  },
-  {
-   "key": "地理",
-   "name": "地理|哔哩",
-   "type": 3,
-   "api": "csp_Bili",
-   "searchable": 0,
-   "quickSearch": 0,
-   "filterable": 0,
-   "ext": {
-    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%B0%8F%E7%81%AF%E5%A1%94%E5%9C%B0%E7%90%86.json"
-   },
-   "style": {
-    "type": "rect",
-    "ratio": 1.597
-   }
-  },
-  {
-   "key": "编程",
-   "name": "编程|哔哩",
-   "type": 3,
-   "api": "csp_Bili",
-   "searchable": 0,
-   "quickSearch": 0,
-   "filterable": 0,
-   "ext": {
-    "cookie": "http://127.0.0.1:9978/file/TVBox/bili_cookie.txt",
-    "json": "https://cdn.jsdmirror.com/gh/ouhaibo1980/tvbox%40main/Bil/%E5%84%BF%E7%AB%A5%E7%BC%96%E7%A8%8B.json"
-   },
-   "style": {
-    "type": "rect",
-    "ratio": 1.597
-   }
-  }
- ],
- "lives": [],
- "parses": []
+  "lives": [],
+  "parses": []
 }

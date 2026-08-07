@@ -575,6 +575,7 @@
 
                         <LinearLayout
                             android:id="@+id/llHomeRec"
+                            android:nextFocusDown="@id/llAgeFilter"
                             android:layout_width="@dimen/vs_0"
                             android:layout_height="match_parent"
                             android:layout_marginEnd="@dimen/vs_5"
@@ -618,6 +619,7 @@
 
                         <LinearLayout
                             android:id="@+id/llHomeNum"
+                            android:nextFocusDown="@id/llAgeFilter"
                             android:layout_width="@dimen/vs_0"
                             android:layout_height="match_parent"
                             android:layout_marginStart="@dimen/vs_5"
@@ -671,6 +673,8 @@
 
                         <LinearLayout
                             android:id="@+id/llAgeFilter"
+                            android:nextFocusUp="@id/llHomeRec"
+                            android:nextFocusDown="@id/llPlayLimit"
                             android:layout_width="@dimen/vs_0"
                             android:layout_height="match_parent"
                             android:layout_marginStart="@dimen/vs_5"
@@ -726,6 +730,7 @@
 
                         <LinearLayout
                             android:id="@+id/llPlayLimit"
+                            android:nextFocusUp="@id/llAgeFilter"
                             android:layout_width="@dimen/vs_0"
                             android:layout_height="match_parent"
                             android:layout_marginStart="@dimen/vs_5"
@@ -771,6 +776,7 @@
 
                         <LinearLayout
                             android:id="@+id/llPlayLimitMin"
+                            android:nextFocusUp="@id/llAgeFilter"
                             android:layout_width="@dimen/vs_0"
                             android:layout_height="match_parent"
                             android:layout_marginStart="@dimen/vs_5"

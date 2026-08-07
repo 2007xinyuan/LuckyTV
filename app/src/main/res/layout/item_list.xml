@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:background="@drawable/shape_user_focus"
-    android:focusable="true">
+    android:focusable="true"
+    android:clickable="true">
 
 
     <LinearLayout

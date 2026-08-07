@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Lucky TV</string>
     <string name="app_home">Home</string>
-    <string name="app_source">https://fastly.jsdelivr.net/gh/2007xinyuan/LuckyTV@main/app/src/main/assets/children_config.json</string>
+    <string name="app_source">http://tjaovy2cz.hd-bkt.clouddn.com/config/app.json</string>
 
     // Home Page //
     <string name="hm_ok">Load Complete</string>

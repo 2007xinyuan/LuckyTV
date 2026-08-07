@@ -108,6 +108,7 @@ public class HomeActivity extends BaseActivity {
     private SortAdapter sortAdapter;
     private HomePageAdapter pageAdapter;
     private final List<BaseLazyFragment> fragments = new ArrayList<>();
+    private boolean viewPagerInited = false; // ViewPager 只初始化一次（observe 多次触发防重建）
     private boolean isDownOrUp = false;
     private boolean sortChange = false;
     private int currentSelected = 0;
@@ -604,6 +605,9 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void initViewPager(AbsSortXml absXml) {
+        // 只初始化一次：observe 会因 getSort/cache-hit/injectHomeVideos 多次触发，
+        // 重复重建 ViewPager 会导致 fragment tag 冲突/空白。分类栏数据每次都会更新。
+        if (viewPagerInited) return;
         if (sortAdapter.getData().size() > 0) {
             for (MovieSort.SortData data : sortAdapter.getData()) {
                 if (data.id.equals("my0")) {
@@ -628,6 +632,7 @@ public class HomeActivity extends BaseActivity {
             mViewPager.setPageTransformer(true, new DefaultTransformer());
             mViewPager.setAdapter(pageAdapter);
             mViewPager.setCurrentItem(currentSelected, false);
+            viewPagerInited = true;
         }
     }
 
