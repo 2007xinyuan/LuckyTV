@@ -33,6 +33,45 @@ public class AdCloudSync {
     private static volatile boolean sPulling = false;
     private static volatile boolean sPushing = false;
 
+    // ===== 客户端硬校验（防误标记/恶意刷库污染共享库）=====
+    private static final long MAX_SEG_LEN_MS = 30 * 60 * 1000L;  // 单段最长 30 分钟（广告段应远短于此）
+    private static final int MAX_SEGS_PER_VIDEO = 10;            // 单个视频最多 10 段
+    private static final int MAX_VIDEO_ENTRIES = 5000;           // 云端库最多 5000 个视频条目（防刷库膨胀）
+
+    /** 清洗广告段串 "s1,e1;s2,e2"：丢弃非法段（负数/start>=end/超长/格式错），超段数上限截断。非法输入返回空串。 */
+    private static String sanitizeSegments(String segStr) {
+        if (segStr == null || segStr.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        for (String seg : segStr.split(";")) {
+            if (seg.isEmpty()) continue;
+            String[] parts = seg.split(",");
+            if (parts.length != 2) continue;
+            try {
+                long start = Long.parseLong(parts[0].trim());
+                long end = Long.parseLong(parts[1].trim());
+                if (start < 0 || end <= start) continue;          // 非法区间
+                if (end - start > MAX_SEG_LEN_MS) continue;       // 段过长
+                if (count >= MAX_SEGS_PER_VIDEO) break;           // 段数超限
+                if (sb.length() > 0) sb.append(";");
+                sb.append(start).append(",").append(end);
+                count++;
+            } catch (NumberFormatException e) {
+                // 非数字段，丢弃
+            }
+        }
+        return sb.toString();
+    }
+
+    /** 本地标记入库前先清洗，非法标记根本不落 Hawk */
+    private static String sanitizeLocal(String segStr) {
+        String clean = sanitizeSegments(segStr);
+        if (!clean.equals(segStr)) {
+            LOG.i(TAG, "local ad mark sanitized: '" + segStr + "' -> '" + clean + "'");
+        }
+        return clean;
+    }
+
     /** 拉取云端广告标记并合并进本地 Hawk（后台线程，失败静默不影响播放） */
     public static void pullAndMerge(final Context ctx) {
         final String cloudUrl = Hawk.get(HawkConfig.AD_CLOUD_URL, "");
@@ -55,11 +94,17 @@ public class AdCloudSync {
                     JSONObject root = new JSONObject(json);
                     if (!root.has("segments")) return;
                     JSONObject segs = root.getJSONObject("segments");
+                    // 防刷库：云端条目数超上限直接放弃本次合并
+                    if (segs.length() > MAX_VIDEO_ENTRIES) {
+                        LOG.i(TAG, "cloud ad lib too large (" + segs.length() + " entries), skip merge");
+                        return;
+                    }
                     int merged = 0;
                     Iterator<String> it = segs.keys();
                     while (it.hasNext()) {
                         String md5 = it.next();
-                        String segStr = segs.optString(md5, "");
+                        // 云端数据不可信：合并前先清洗（非法段/超长段/段数超限一律丢弃）
+                        String segStr = sanitizeSegments(segs.optString(md5, ""));
                         if (segStr.isEmpty()) continue;
                         String key = HawkConfig.AD_SEGMENTS_PREFIX + md5;
                         String local = Hawk.get(key, "");
@@ -81,9 +126,11 @@ public class AdCloudSync {
         });
     }
 
-    /** 本地标记保存后调用：把该视频的新标记记录到待回传队列 */
+    /** 本地标记保存后调用：把该视频的新标记记录到待回传队列（先清洗，非法标记不入队） */
     public static void recordLocal(String md5, String segStr) {
         try {
+            segStr = sanitizeLocal(segStr);
+            if (segStr.isEmpty()) return;
             Map<String, String> pending = getPending();
             String old = pending.get(md5);
             pending.put(md5, (old == null || old.isEmpty()) ? segStr : mergeSegments(old, segStr));
@@ -93,9 +140,9 @@ public class AdCloudSync {
         }
     }
 
-    /** 回传待回传队列到云端（后台线程；成功后清空队列） */
+    /** 回传待回传队列到云端（后台线程；成功后清空队列）。默认关闭：仅管理员（云端配置）可开启 */
     public static void pushLocal() {
-        if (!Hawk.get(HawkConfig.AD_CLOUD_PUSH, true)) return;
+        if (!Hawk.get(HawkConfig.AD_CLOUD_PUSH, false)) return;
         final String cloudUrl = Hawk.get(HawkConfig.AD_CLOUD_URL, "");
         if (cloudUrl.isEmpty()) return;
         if (sPushing) return;
@@ -107,7 +154,7 @@ public class AdCloudSync {
                     Map<String, String> pending = getPending();
                     if (pending.isEmpty()) return;
 
-                    // 1. 拉取云端当前库作为基底（云端为主、本地补充）
+                    // 1. 拉取云端当前库作为基底（云端为主、本地补充；云端数据同样先清洗）
                     JSONObject segs = new JSONObject();
                     try {
                         HttpURLConnection conn = (HttpURLConnection) new URL(cloudUrl).openConnection();
@@ -121,22 +168,29 @@ public class AdCloudSync {
                             JSONObject root = new JSONObject(json);
                             if (root.has("segments")) {
                                 JSONObject remote = root.getJSONObject("segments");
+                                if (remote.length() > MAX_VIDEO_ENTRIES) {
+                                    LOG.i(TAG, "cloud ad lib too large (" + remote.length() + " entries), push aborted");
+                                    return;
+                                }
                                 Iterator<String> it = remote.keys();
                                 while (it.hasNext()) {
                                     String md5 = it.next();
-                                    segs.put(md5, remote.optString(md5, ""));
+                                    String clean = sanitizeSegments(remote.optString(md5, ""));
+                                    if (!clean.isEmpty()) segs.put(md5, clean);
                                 }
                             }
                         }
                     } catch (Throwable ignore) {
                     }
-                    // 2. 合并待回传队列
+                    // 2. 合并待回传队列（本地队列入库时已清洗，此处防御性再清一次）
                     for (Map.Entry<String, String> e : pending.entrySet()) {
                         String md5 = e.getKey();
+                        String clean = sanitizeSegments(e.getValue());
+                        if (clean.isEmpty()) continue;
                         if (segs.has(md5)) {
-                            segs.put(md5, mergeSegments(segs.optString(md5, ""), e.getValue()));
+                            segs.put(md5, mergeSegments(segs.optString(md5, ""), clean));
                         } else {
-                            segs.put(md5, e.getValue());
+                            segs.put(md5, clean);
                         }
                     }
 

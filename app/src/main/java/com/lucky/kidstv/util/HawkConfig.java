@@ -86,7 +86,7 @@ public class HawkConfig {
     public static final String AD_SKIP_ENABLE = "ad_skip_enable";   // 是否开启广告段自动跳过
     public static final String AD_SEGMENTS_PREFIX = "ad_segments_"; // 视频广告段表: ad_segments_<md5(url)> = "start1,end1;start2,end2"（毫秒）
     public static final String AD_CLOUD_URL = "ad_cloud_url";       // 云端广告标记库地址（七牛公开读）
-    public static final String AD_CLOUD_PUSH = "ad_cloud_push";     // 是否允许本地标记回传云端（默认 true）
+    public static final String AD_CLOUD_PUSH = "ad_cloud_push";     // 是否允许本地标记回传云端（默认 false：只读共享，防乱标记污染）
     public static final String CONFIG_VERSION = "config_version";   // 云端配置版本号（热更新对比用）
     public static final String AD_MARK_START_HINT = "已标记广告起点，播到广告结束再按一次";
     public static final String AD_MARK_END_HINT = "已标记广告段并保存，下次播放将自动跳过";
