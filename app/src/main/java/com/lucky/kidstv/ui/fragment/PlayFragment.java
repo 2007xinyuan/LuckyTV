@@ -152,6 +152,8 @@ public class PlayFragment extends BaseLazyFragment {
     private String danmuText;
 
     private String videoURL;
+    // m3u8 净化路径下实际播放 127.0.0.1 本地代理, 此字段保留净化前的原始直链用于广告段匹配
+    private String originVideoURL;
     private long videoDuration = -1;
     private List<String> videoSegmentationURL = new ArrayList<>();
 
@@ -690,6 +692,10 @@ public class PlayFragment extends BaseLazyFragment {
     }
 
     void playUrl(String url, HashMap<String, String> headers) {
+        // 记录原始直链(净化前), 供广告段匹配; 本地代理地址不覆盖
+        if (url != null && !url.contains("127.0.0.1")) {
+            originVideoURL = url;
+        }
         if (!Hawk.get(HawkConfig.VIDEO_PURIFY, true)) {
             startPlayUrl(url, headers);
             return;
@@ -1163,7 +1169,9 @@ public class PlayFragment extends BaseLazyFragment {
         if (mVideoView.isPlaying() && videoURL != null) {
             long pos = mVideoView.getCurrentPosition();
             if (pos > 0) {
-                long[] seg = getAdSegment(videoURL, pos, false);
+                // m3u8 净化路径下 videoURL 是 127.0.0.1 本地代理, 用净化前的原始直链匹配广告规则
+                String adMatchUrl = (videoURL.contains("127.0.0.1") && originVideoURL != null) ? originVideoURL : videoURL;
+                long[] seg = getAdSegment(adMatchUrl, pos, false);
                 if (seg != null) {
                     mVideoView.seekTo(seg[1]);
                     setTip("已跳过广告片段", true, false);
