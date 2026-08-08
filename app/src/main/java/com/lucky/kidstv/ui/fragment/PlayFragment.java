@@ -1216,33 +1216,16 @@ public class PlayFragment extends BaseLazyFragment {
         com.lucky.kidstv.util.AdCloudSync.pushLocal();
     }
 
-    // 内置广告位置规则: {URL域名特征, 广告开始ms, 广告结束ms}
-    // 量子源(lz-cdn系列) 2026-08-04 实测8集(安全警长4集/超级飞侠2集/熊出没2集):
-    //   广告固定在 ~296-300s(第5分钟) 开始, ~322-323s 结束, 同一段赌博口播录音
-    // 非凡源(ffzy) 2026-08-05 用户实测: 安全警长 5:59(~359s) 也有博彩口播广告, 内容与量子源不同,
-    //   暂未确认是否固定位置(仅1集样本), 未加内置规则——手动标记(INFO/MENU)已覆盖, 待更多实测再补规则
-    private static final String[][] BUILTIN_AD_RULES = {
-            {"lz-cdn", "296000", "323000"},
-            {"cdnlz", "296000", "323000"},
-    };
+    // 内置广告规则已于 2026-08-08 移除: 域名级规则(量子源 lz-cdn/cdnlz 全跳)与
+    // "没抽查的不标记"冲突, 且 URL 路径 ID 为集内唯一(https://<域名>/<日期>/<id>_<hash>/index.m3u8)
+    // 无法按系列收窄。广告跳过全走云端 MD5 精确标记(750 条已覆盖 15 个抽查系列全集,
+    // m3u8 净化路径 originVideoURL 修复后 MD5 匹配可靠), 断网时本地 Hawk 已有合并缓存。
+    // 历史实测参考: 量子源广告 ~296-323s(第5分钟, 赌博口播); 非凡源(ffzy)安全警长 5:59 也有,
+    // 但仅 1 集样本未确认固定位置——手动标记(INFO/MENU)可覆盖
 
     // 查询位置是否落在广告段内，返回该段 [start,end] 否则 null
-    // forceBuiltin=true 时无条件查（含手动标记）；false 时内置规则无条件，手动标记受 AD_SKIP_ENABLE 控制
+    // 仅查用户手动标记 + 云端合并库; forceBuiltin=true 时无条件查, false 时受 AD_SKIP_ENABLE 开关控制
     private long[] getAdSegment(String url, long pos, boolean forceBuiltin) {
-        // 1. 内置规则（按源域名特征匹配，装好即生效，不受开关控制）
-        if (url != null) {
-            String lower = url.toLowerCase();
-            for (String[] rule : BUILTIN_AD_RULES) {
-                if (lower.contains(rule[0])) {
-                    long start = Long.parseLong(rule[1]);
-                    long end = Long.parseLong(rule[2]);
-                    if (pos >= start - 500 && pos <= end + 500) {
-                        return new long[]{start, end};
-                    }
-                }
-            }
-        }
-        // 2. 用户手动标记（INFO键）——受 AD_SKIP_ENABLE 开关控制
         if (url == null) return null;
         if (!forceBuiltin && !Hawk.get(HawkConfig.AD_SKIP_ENABLE, false)) return null;
         String key = HawkConfig.AD_SEGMENTS_PREFIX + MD5.string2MD5(url);
