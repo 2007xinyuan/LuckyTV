@@ -108,6 +108,10 @@ public class CollectActivity extends BaseActivity {
             @Override
             public void onItemClick(TvRecyclerView parent, View itemView, int position) {
 
+                // TV 焦点 OK 键点击：转发到 BaseQuickAdapter 点击监听（触摸通道共用同一逻辑）
+                if (collectAdapter.getOnItemClickListener() != null) {
+                    collectAdapter.getOnItemClickListener().onItemClick(collectAdapter, itemView, position);
+                }
             }
         });
         collectAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {

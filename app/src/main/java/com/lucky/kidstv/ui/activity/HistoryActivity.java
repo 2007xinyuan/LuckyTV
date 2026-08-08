@@ -111,6 +111,10 @@ public class HistoryActivity extends BaseActivity {
             @Override
             public void onItemClick(TvRecyclerView parent, View itemView, int position) {
 
+                // TV 焦点 OK 键点击：转发到 BaseQuickAdapter 点击监听（触摸通道共用同一逻辑）
+                if (historyAdapter.getOnItemClickListener() != null) {
+                    historyAdapter.getOnItemClickListener().onItemClick(historyAdapter, itemView, position);
+                }
             }
         });
         historyAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {

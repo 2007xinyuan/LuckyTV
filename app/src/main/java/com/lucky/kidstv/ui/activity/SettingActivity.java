@@ -102,6 +102,11 @@ public class SettingActivity extends BaseActivity {
             @Override
             public void onItemClick(TvRecyclerView parent, View itemView, int position) {
 
+                // TV 焦点 OK 键点击：转发到子项点击监听（切换设置页逻辑）
+                if (sortAdapter.getOnItemChildClickListener() != null) {
+                    View tvName = itemView == null ? null : itemView.findViewById(R.id.tvName);
+                    sortAdapter.getOnItemChildClickListener().onItemChildClick(sortAdapter, tvName != null ? tvName : itemView, position);
+                }
             }
         });
     }

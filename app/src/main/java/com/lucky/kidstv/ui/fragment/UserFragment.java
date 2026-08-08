@@ -234,6 +234,10 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
             @Override
             public void onItemClick(TvRecyclerView parent, View itemView, int position) {
 
+                // TV 焦点 OK 键点击：转发到 BaseQuickAdapter 点击监听（触摸通道共用同一逻辑）
+                if (homeHotVodAdapter.getOnItemClickListener() != null) {
+                    homeHotVodAdapter.getOnItemClickListener().onItemClick(homeHotVodAdapter, itemView, position);
+                }
             }
         });
         tvHotListForGrid.setAdapter(homeHotVodAdapter);
@@ -252,6 +256,10 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
             @Override
             public void onItemClick(TvRecyclerView parent, View itemView, int position) {
 
+                // TV 焦点 OK 键点击：转发到 BaseQuickAdapter 点击监听（触摸通道共用同一逻辑）
+                if (homeHotVodAdapter.getOnItemClickListener() != null) {
+                    homeHotVodAdapter.getOnItemClickListener().onItemClick(homeHotVodAdapter, itemView, position);
+                }
             }
         });
         tvHotListForLine.setAdapter(homeHotVodAdapter);
